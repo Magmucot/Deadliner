@@ -4,25 +4,42 @@ pkgrel=1
 pkgdesc="Cross-platform desktop reminder and break app built with Qt 6"
 arch=('x86_64')
 url="https://github.com/Magmucot/Deadliner"
-license=('custom')
+license=('MIT')
 depends=('qt6-base' 'sqlite')
 makedepends=('cmake' 'ninja' 'qt6-tools')
+# No remote source — builds directly from the repository tree.
+# $startdir is set by makepkg to the directory containing this PKGBUILD,
+# i.e. packaging/linux/. Going three levels up reaches the repo root.
 source=()
 sha256sums=()
 
 build() {
-  cd "$srcdir"
-  cmake -S ../../../ -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
-  cmake --build build
+    local reporoot
+    reporoot="$(realpath "${startdir}/../../..")"
+
+    cmake \
+        -S "$reporoot" \
+        -B "${srcdir}/build" \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr
+    cmake --build "${srcdir}/build"
 }
 
 package() {
-  cd "$srcdir"
-  DESTDIR="$pkgdir" cmake --install build
-  
-  # Install desktop file
-  install -Dm644 ../../../packaging/linux/deadliner.desktop "$pkgdir/usr/share/applications/deadliner.desktop"
-  
-  # Install license
-  install -Dm644 ../../../LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    DESTDIR="$pkgdir" cmake --install "${srcdir}/build"
+
+    install -Dm644 \
+        "${startdir}/deadliner.desktop" \
+        "${pkgdir}/usr/share/applications/deadliner.desktop"
+
+    if [ -f "${startdir}/deadliner.png" ]; then
+        install -Dm644 \
+            "${startdir}/deadliner.png" \
+            "${pkgdir}/usr/share/icons/hicolor/256x256/apps/deadliner.png"
+    fi
+
+    install -Dm644 \
+        "$(realpath "${startdir}/../../../LICENSE")" \
+        "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
