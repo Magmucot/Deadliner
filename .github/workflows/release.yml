@@ -142,7 +142,7 @@ jobs:
           chown -R builduser:builduser /home/builduser/deadliner
 
           su builduser -c \
-            "cd /home/builduser/deadliner && makepkg --noconfirm -sf -d packaging/linux"
+            "cd /home/builduser/deadliner/packaging/linux && makepkg --noconfirm -sf"
 
           # Collect the produced package back into the workspace
           mv /home/builduser/deadliner/packaging/linux/*.pkg.tar.zst ./ || true
