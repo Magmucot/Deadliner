@@ -11,6 +11,7 @@ class QDateTimeEdit;
 class QFormLayout;
 class QLabel;
 class QPushButton;
+class QRadioButton;
 class QTimeEdit;
 
 namespace deadliner::ui
@@ -55,7 +56,8 @@ namespace deadliner::ui
         QCheckBox *m_closeToTrayCheckbox = nullptr;
         QComboBox *m_languageCombo = nullptr;
         QComboBox *m_themeCombo = nullptr;
-        QComboBox *m_trayIconCombo = nullptr;
+        QRadioButton *m_iconVariant1Radio = nullptr;
+        QRadioButton *m_iconVariant2Radio = nullptr;
         QComboBox *m_defaultProfileCombo = nullptr;
         QDateTimeEdit *m_pauseUntilEdit = nullptr;
         QTimeEdit *m_quietStartEdit = nullptr;

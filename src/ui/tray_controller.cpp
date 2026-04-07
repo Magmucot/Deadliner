@@ -143,9 +143,9 @@ void TrayController::setIcon(const QString &iconVariant)
 {
     QString iconPath;
     if (iconVariant == QStringLiteral("variant2")) {
-        iconPath = QStringLiteral(":/icons/icons/icon_variant2.png");
+        iconPath = QStringLiteral(":/icons/icons/icon_variant2_256.png");
     } else {
-        iconPath = QStringLiteral(":/icons/icons/icon_variant1.png");
+        iconPath = QStringLiteral(":/icons/icons/icon_variant1_256.png");
     }
     
     QIcon icon(iconPath);

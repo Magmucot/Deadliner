@@ -7,8 +7,10 @@
 #include <QDateTimeEdit>
 #include <QEvent>
 #include <QFormLayout>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QSignalBlocker>
 #include <QTimeEdit>
 #include <QVariant>
@@ -62,9 +64,22 @@ namespace deadliner::ui
         m_closeToTrayCheckbox = new QCheckBox(this);
         m_languageCombo = new QComboBox(this);
         m_themeCombo = new QComboBox(this);
-        m_trayIconCombo = new QComboBox(this);
-        m_trayIconCombo->addItem(QString(), QStringLiteral("variant1"));
-        m_trayIconCombo->addItem(QString(), QStringLiteral("variant2"));
+        
+        // Create icon selection with preview
+        m_iconVariant1Radio = new QRadioButton(this);
+        m_iconVariant1Radio->setIcon(QIcon(QStringLiteral(":/icons/icons/icon_variant1_256.png")));
+        m_iconVariant1Radio->setIconSize(QSize(64, 64));
+        m_iconVariant1Radio->setChecked(true);
+        
+        m_iconVariant2Radio = new QRadioButton(this);
+        m_iconVariant2Radio->setIcon(QIcon(QStringLiteral(":/icons/icons/icon_variant2_256.png")));
+        m_iconVariant2Radio->setIconSize(QSize(64, 64));
+        
+        auto *iconLayout = new QHBoxLayout();
+        iconLayout->addWidget(m_iconVariant1Radio);
+        iconLayout->addWidget(m_iconVariant2Radio);
+        iconLayout->addStretch();
+        
         m_defaultProfileCombo = new QComboBox(this);
         m_pauseUntilEdit = new QDateTimeEdit(this);
         m_pauseUntilEdit->setCalendarPopup(true);
@@ -81,7 +96,7 @@ namespace deadliner::ui
         m_form->addRow(m_closeToTrayCheckbox);
         m_form->addRow(createFormLabel(this), m_languageCombo);
         m_form->addRow(createFormLabel(this), m_themeCombo);
-        m_form->addRow(createFormLabel(this), m_trayIconCombo);
+        m_form->addRow(createFormLabel(this), iconLayout);
         m_form->addRow(createFormLabel(this), m_defaultProfileCombo);
         m_form->addRow(createFormLabel(this), m_pauseUntilEdit);
         m_form->addRow(createFormLabel(this), m_quietStartEdit);
@@ -108,7 +123,7 @@ namespace deadliner::ui
         settings.closeToTray = m_closeToTrayCheckbox->isChecked();
         settings.language = m_languageCombo->currentData().toString();
         settings.theme = m_themeCombo->currentData().toString();
-        settings.trayIcon = m_trayIconCombo->currentData().toString();
+        settings.trayIcon = m_iconVariant2Radio->isChecked() ? QStringLiteral("variant2") : QStringLiteral("variant1");
         settings.defaultProfileId = m_defaultProfileCombo->currentData().toLongLong();
         settings.pauseUntil = m_pauseUntilEdit->dateTime();
 
@@ -189,7 +204,15 @@ namespace deadliner::ui
         m_saveButton->setText(tr("Save"));
         setLabelText(m_languageCombo, tr("Language"));
         setLabelText(m_themeCombo, tr("Theme"));
-        setLabelText(m_trayIconCombo, tr("Tray icon"));
+        
+        // Set label for icon radio buttons layout
+        if (auto *label = qobject_cast<QLabel *>(m_form->labelForField(m_iconVariant1Radio->parentWidget()))) {
+            label->setText(tr("Tray icon"));
+        }
+        
+        m_iconVariant1Radio->setText(tr("Variant 1"));
+        m_iconVariant2Radio->setText(tr("Variant 2"));
+        
         setLabelText(m_defaultProfileCombo, tr("Default profile"));
         setLabelText(m_pauseUntilEdit, tr("Pause reminders until"));
         setLabelText(m_quietStartEdit, tr("Quiet hours start"));
@@ -213,12 +236,6 @@ namespace deadliner::ui
             m_themeCombo->setItemText(0, tr("System"));
             m_themeCombo->setItemText(1, tr("Light"));
             m_themeCombo->setItemText(2, tr("Dark"));
-        }
-
-        if (m_trayIconCombo->count() >= 2)
-        {
-            m_trayIconCombo->setItemText(0, tr("Icon variant 1"));
-            m_trayIconCombo->setItemText(1, tr("Icon variant 2"));
         }
 
         const QList<QComboBox *> combos = {m_softBehaviorCombo, m_persistentBehaviorCombo, m_breakBehaviorCombo};
@@ -248,7 +265,6 @@ namespace deadliner::ui
 
         const QSignalBlocker languageBlocker(m_languageCombo);
         const QSignalBlocker themeBlocker(m_themeCombo);
-        const QSignalBlocker iconBlocker(m_trayIconCombo);
         const QSignalBlocker profileBlocker(m_defaultProfileCombo);
 
         const int languageIndex = m_languageCombo->findData(m_settings.language);
@@ -257,8 +273,12 @@ namespace deadliner::ui
         const int themeIndex = m_themeCombo->findData(m_settings.theme);
         m_themeCombo->setCurrentIndex(themeIndex >= 0 ? themeIndex : 0);
 
-        const int iconIndex = m_trayIconCombo->findData(m_settings.trayIcon);
-        m_trayIconCombo->setCurrentIndex(iconIndex >= 0 ? iconIndex : 0);
+        // Set icon radio buttons based on settings
+        if (m_settings.trayIcon == QStringLiteral("variant2")) {
+            m_iconVariant2Radio->setChecked(true);
+        } else {
+            m_iconVariant1Radio->setChecked(true);
+        }
 
         m_defaultProfileCombo->clear();
         for (const auto &profile : m_profiles)
