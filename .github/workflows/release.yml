@@ -37,8 +37,16 @@ jobs:
       - name: Deploy Qt dependencies
         shell: pwsh
         run: |
-          & "${{ env.Qt6_DIR }}/bin/windeployqt.exe" `
-            build/deadliner.exe --release --no-translations
+          $qtBinPath = "${{ runner.workspace }}\Qt\6.5.3\msvc2019_64\bin\windeployqt.exe"
+          if (-Not (Test-Path $qtBinPath)) {
+            # Резервный вариант: поиск windeployqt.exe
+            $qtBinPath = Get-ChildItem -Path "${{ runner.workspace }}\Qt" -Filter "windeployqt.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+          }
+          if (-Not $qtBinPath) {
+            Write-Error "windeployqt.exe не найден!"
+            exit 1
+          }
+          & $qtBinPath build/deadliner.exe --release --no-translations
 
       - name: Install NSIS
         run: choco install nsis -y
@@ -134,7 +142,7 @@ jobs:
           chown -R builduser:builduser /home/builduser/deadliner
 
           su builduser -c \
-            "cd /home/builduser/deadliner/packaging/linux && makepkg --noconfirm -sf"
+            "cd /home/builduser/deadliner && makepkg --noconfirm -sf -d packaging/linux"
 
           # Collect the produced package back into the workspace
           mv /home/builduser/deadliner/packaging/linux/*.pkg.tar.zst ./ || true
