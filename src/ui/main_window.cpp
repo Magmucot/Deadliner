@@ -93,7 +93,7 @@ namespace deadliner::ui
         m_titleLabel->setStyleSheet(QStringLiteral("font-size: 26px; font-weight: 700;"));
         m_subtitleLabel = new QLabel(contentWidget);
         m_subtitleLabel->setWordWrap(true);
-        m_subtitleLabel->setStyleSheet(QStringLiteral("color: palette(mid); margin-bottom: 8px;"));
+        m_subtitleLabel->setStyleSheet(QStringLiteral("color: palette(window-text); margin-bottom: 8px;"));
 
         m_pages = new QStackedWidget(contentWidget);
         m_todayPage = new TodayPage(m_pages);

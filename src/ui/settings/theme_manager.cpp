@@ -65,7 +65,9 @@ QComboBox {
     border: 1px solid palette(midlight);
     border-radius: 6px;
     padding: 4px 8px;
+    padding-right: 28px;
     background: palette(base);
+    color: palette(text);
     min-height: 26px;
 }
 QLineEdit:focus,
@@ -77,8 +79,26 @@ QComboBox:focus {
     border-color: palette(highlight);
 }
 QComboBox::drop-down {
-    border: none;
-    padding-right: 8px;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 24px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+QDateTimeEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 24px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+QComboBox::down-arrow,
+QDateTimeEdit::down-arrow {
+    width: 10px;
+    height: 10px;
+}
+QComboBox QAbstractItemView {
+    outline: none;
 }
 QSpinBox::up-button,
 QSpinBox::down-button,
@@ -164,6 +184,33 @@ QToolTip {
 }
 )";
 
+        constexpr auto kLightExtraQss = R"(
+QComboBox::drop-down,
+QDateTimeEdit::drop-down {
+    border-left: 1px solid #c9c9c9;
+    background: #f3f3f3;
+}
+QComboBox QAbstractItemView {
+    border: 1px solid #c9c9c9;
+    background: #ffffff;
+    color: #202124;
+    selection-background-color: #4a90e2;
+    selection-color: #ffffff;
+}
+QComboBox QAbstractItemView::item {
+    min-height: 24px;
+    padding: 4px 8px;
+}
+QComboBox QAbstractItemView::item:selected {
+    background: #4a90e2;
+    color: #ffffff;
+}
+QComboBox QAbstractItemView::item:hover:!selected {
+    background: #e8f0fe;
+    color: #202124;
+}
+)";
+
         // Extra overrides for dark mode where palette tokens alone are insufficient.
         constexpr auto kDarkExtraQss = R"(
 QPushButton {
@@ -179,6 +226,30 @@ QDateTimeEdit,
 QTimeEdit,
 QComboBox {
     border-color: rgba(255, 255, 255, 0.12);
+}
+QComboBox::drop-down,
+QDateTimeEdit::drop-down {
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgb(52, 52, 56);
+}
+QComboBox QAbstractItemView {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgb(37, 37, 40);
+    color: rgb(240, 240, 240);
+    selection-background-color: rgb(74, 144, 226);
+    selection-color: rgb(255, 255, 255);
+}
+QComboBox QAbstractItemView::item {
+    min-height: 24px;
+    padding: 4px 8px;
+}
+QComboBox QAbstractItemView::item:selected {
+    background: rgb(74, 144, 226);
+    color: rgb(255, 255, 255);
+}
+QComboBox QAbstractItemView::item:hover:!selected {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgb(240, 240, 240);
 }
 QTableWidget {
     border-color: rgba(255, 255, 255, 0.10);
@@ -228,7 +299,7 @@ QHeaderView::section {
         {
             // Light or system: reset to standard Fusion palette and apply base QSS.
             application.setPalette(application.style()->standardPalette());
-            application.setStyleSheet(QString::fromUtf8(kBaseQss));
+            application.setStyleSheet(QString::fromUtf8(kBaseQss) + QString::fromUtf8(kLightExtraQss));
         }
     }
 
