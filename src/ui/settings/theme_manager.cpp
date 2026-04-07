@@ -196,10 +196,12 @@ QComboBox QAbstractItemView {
     color: #202124;
     selection-background-color: #4a90e2;
     selection-color: #ffffff;
+    padding: 0;
 }
 QComboBox QAbstractItemView::item {
-    min-height: 24px;
+    min-height: 20px;
     padding: 4px 8px;
+    border: none;
 }
 QComboBox QAbstractItemView::item:selected {
     background: #4a90e2;
@@ -238,10 +240,12 @@ QComboBox QAbstractItemView {
     color: rgb(240, 240, 240);
     selection-background-color: rgb(74, 144, 226);
     selection-color: rgb(255, 255, 255);
+    padding: 0;
 }
 QComboBox QAbstractItemView::item {
-    min-height: 24px;
+    min-height: 20px;
     padding: 4px 8px;
+    border: none;
 }
 QComboBox QAbstractItemView::item:selected {
     background: rgb(74, 144, 226);

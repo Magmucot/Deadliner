@@ -8,6 +8,7 @@
 class QCheckBox;
 class QComboBox;
 class QFormLayout;
+class QLabel;
 class QLineEdit;
 class QPushButton;
 class QSpinBox;
@@ -33,6 +34,14 @@ private:
     qint64 m_existingId = 0;
     bool m_builtIn = false;
     QFormLayout *m_form = nullptr;
+    QLabel *m_nameLabel = nullptr;
+    QLabel *m_kindLabel = nullptr;
+    QLabel *m_intervalLabel = nullptr;
+    QLabel *m_breakDurationLabel = nullptr;
+    QLabel *m_modeLabel = nullptr;
+    QLabel *m_maxSnoozeLabel = nullptr;
+    QLabel *m_snoozeLabel = nullptr;
+    QLabel *m_quietLabel = nullptr;
     QLineEdit *m_nameEdit = nullptr;
     QComboBox *m_kindCombo = nullptr;
     QSpinBox *m_intervalSpin = nullptr;

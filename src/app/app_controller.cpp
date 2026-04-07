@@ -704,6 +704,9 @@ domain::ReminderEvent AppController::eventForId(qint64 id) const
 
 domain::QuietHoursPolicy AppController::quietPolicyForId(qint64 id) const
 {
+    if (id <= 0) {
+        return {};
+    }
     for (const auto &policy : m_state.quietHoursPolicies) {
         if (policy.id == id) {
             return policy;

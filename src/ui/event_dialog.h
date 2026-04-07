@@ -36,6 +36,13 @@ private:
     QList<domain::ReminderProfile> m_profiles;
     qint64 m_existingId = 0;
     QFormLayout *m_form = nullptr;
+    QLabel *m_titleFieldLabel = nullptr;
+    QLabel *m_descriptionFieldLabel = nullptr;
+    QLabel *m_typeFieldLabel = nullptr;
+    QLabel *m_profileFieldLabel = nullptr;
+    QLabel *m_profileBehaviorFieldLabel = nullptr;
+    QLabel *m_startFieldLabel = nullptr;
+    QLabel *m_recurrenceFieldLabel = nullptr;
     QLineEdit *m_titleEdit = nullptr;
     QPlainTextEdit *m_descriptionEdit = nullptr;
     QComboBox *m_typeCombo = nullptr;

@@ -18,6 +18,17 @@
 
 namespace deadliner::ui {
 
+namespace {
+
+QLabel *createFormLabel(QWidget *parent)
+{
+    auto *label = new QLabel(parent);
+    label->setStyleSheet(QStringLiteral("color: palette(window-text);"));
+    return label;
+}
+
+} // namespace
+
 EventDialog::EventDialog(const QList<domain::ReminderProfile> &profiles,
                          const domain::ReminderEvent *event,
                          QWidget *parent)
@@ -28,6 +39,10 @@ EventDialog::EventDialog(const QList<domain::ReminderProfile> &profiles,
 
     auto *layout = new QVBoxLayout(this);
     m_form = new QFormLayout();
+    m_form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+    m_form->setRowWrapPolicy(QFormLayout::WrapAllRows);
+    m_form->setHorizontalSpacing(12);
+    m_form->setVerticalSpacing(10);
 
     m_titleEdit = new QLineEdit(this);
     m_descriptionEdit = new QPlainTextEdit(this);
@@ -51,17 +66,28 @@ EventDialog::EventDialog(const QList<domain::ReminderProfile> &profiles,
     m_enabledCheck->setChecked(true);
     m_profileHintLabel = new QLabel(this);
     m_profileHintLabel->setWordWrap(true);
+    m_profileHintLabel->setStyleSheet(QStringLiteral("color: palette(window-text); margin-bottom: 4px;"));
     m_profileInfoLabel = new QLabel(this);
     m_profileInfoLabel->setWordWrap(true);
+    m_profileInfoLabel->setStyleSheet(QStringLiteral("color: palette(window-text);"));
+    m_profileInfoLabel->setMinimumHeight(fontMetrics().lineSpacing() * 3 + 8);
+
+    m_titleFieldLabel = createFormLabel(this);
+    m_descriptionFieldLabel = createFormLabel(this);
+    m_typeFieldLabel = createFormLabel(this);
+    m_profileFieldLabel = createFormLabel(this);
+    m_profileBehaviorFieldLabel = createFormLabel(this);
+    m_startFieldLabel = createFormLabel(this);
+    m_recurrenceFieldLabel = createFormLabel(this);
 
     m_form->addRow(QString(), m_profileHintLabel);
-    m_form->addRow(QString(), m_titleEdit);
-    m_form->addRow(QString(), m_descriptionEdit);
-    m_form->addRow(QString(), m_typeCombo);
-    m_form->addRow(QString(), m_profileCombo);
-    m_form->addRow(QString(), m_profileInfoLabel);
-    m_form->addRow(QString(), m_startEdit);
-    m_form->addRow(QString(), m_recurrenceCombo);
+    m_form->addRow(m_titleFieldLabel, m_titleEdit);
+    m_form->addRow(m_descriptionFieldLabel, m_descriptionEdit);
+    m_form->addRow(m_typeFieldLabel, m_typeCombo);
+    m_form->addRow(m_profileFieldLabel, m_profileCombo);
+    m_form->addRow(m_profileBehaviorFieldLabel, m_profileInfoLabel);
+    m_form->addRow(m_startFieldLabel, m_startEdit);
+    m_form->addRow(m_recurrenceFieldLabel, m_recurrenceCombo);
     m_form->addRow(QString(), m_oneTimeCheck);
     m_form->addRow(QString(), m_enabledCheck);
 
@@ -120,21 +146,15 @@ void EventDialog::changeEvent(QEvent *event)
 
 void EventDialog::retranslateUi()
 {
-    const auto setLabelText = [this](QWidget *field, const QString &text) {
-        if (auto *label = qobject_cast<QLabel *>(m_form->labelForField(field))) {
-            label->setText(text);
-        }
-    };
-
     setWindowTitle(m_existingId == 0 ? tr("Create event") : tr("Edit event"));
     m_profileHintLabel->setText(tr("Events inherit reminder mode and snooze policy from the selected profile."));
-    setLabelText(m_titleEdit, tr("Title"));
-    setLabelText(m_descriptionEdit, tr("Description"));
-    setLabelText(m_typeCombo, tr("Type"));
-    setLabelText(m_profileCombo, tr("Profile"));
-    setLabelText(m_profileInfoLabel, tr("Profile behavior"));
-    setLabelText(m_startEdit, tr("Start at / anchor"));
-    setLabelText(m_recurrenceCombo, tr("Recurrence"));
+    m_titleFieldLabel->setText(tr("Title"));
+    m_descriptionFieldLabel->setText(tr("Description"));
+    m_typeFieldLabel->setText(tr("Type"));
+    m_profileFieldLabel->setText(tr("Profile"));
+    m_profileBehaviorFieldLabel->setText(tr("Profile behavior"));
+    m_startFieldLabel->setText(tr("Start at / anchor"));
+    m_recurrenceFieldLabel->setText(tr("Recurrence"));
     m_oneTimeCheck->setText(tr("One-time event"));
     m_enabledCheck->setText(tr("Enabled"));
     m_saveButton->setText(tr("Save"));
@@ -153,7 +173,7 @@ void EventDialog::updateProfileSummary()
     const qint64 profileId = m_profileCombo->currentData().toLongLong();
     for (const auto &profile : m_profiles) {
         if (profile.id == profileId) {
-            m_profileInfoLabel->setText(tr("%1 mode, snooze %2 x %3 min, break %4 min")
+            m_profileInfoLabel->setText(tr("Mode: %1\nSnooze: %2 x %3 min\nBreak: %4 min")
                                             .arg(displaySeverityMode(profile.severityMode, this))
                                             .arg(profile.maxSnoozeCount)
                                             .arg(profile.snoozeMinutes)

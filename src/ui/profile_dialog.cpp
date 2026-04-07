@@ -15,6 +15,17 @@
 
 namespace deadliner::ui {
 
+namespace {
+
+QLabel *createFormLabel(QWidget *parent)
+{
+    auto *label = new QLabel(parent);
+    label->setStyleSheet(QStringLiteral("color: palette(window-text);"));
+    return label;
+}
+
+} // namespace
+
 ProfileDialog::ProfileDialog(const QList<domain::QuietHoursPolicy> &policies,
                              const domain::ReminderProfile *profile,
                              QWidget *parent)
@@ -24,6 +35,7 @@ ProfileDialog::ProfileDialog(const QList<domain::QuietHoursPolicy> &policies,
 
     auto *layout = new QVBoxLayout(this);
     m_form = new QFormLayout();
+    m_form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
 
     m_nameEdit = new QLineEdit(this);
     m_kindCombo = new QComboBox(this);
@@ -51,6 +63,7 @@ ProfileDialog::ProfileDialog(const QList<domain::QuietHoursPolicy> &policies,
     m_snoozeSpin->setValue(5);
 
     m_quietCombo = new QComboBox(this);
+    m_quietCombo->addItem(QString(), 0);
     for (const auto &policy : policies) {
         m_quietCombo->addItem(policy.name, policy.id);
     }
@@ -62,14 +75,23 @@ ProfileDialog::ProfileDialog(const QList<domain::QuietHoursPolicy> &policies,
     m_enabledCheck = new QCheckBox(this);
     m_enabledCheck->setChecked(true);
 
-    m_form->addRow(QString(), m_nameEdit);
-    m_form->addRow(QString(), m_kindCombo);
-    m_form->addRow(QString(), m_intervalSpin);
-    m_form->addRow(QString(), m_breakDurationSpin);
-    m_form->addRow(QString(), m_modeCombo);
-    m_form->addRow(QString(), m_maxSnoozeSpin);
-    m_form->addRow(QString(), m_snoozeSpin);
-    m_form->addRow(QString(), m_quietCombo);
+    m_nameLabel = createFormLabel(this);
+    m_kindLabel = createFormLabel(this);
+    m_intervalLabel = createFormLabel(this);
+    m_breakDurationLabel = createFormLabel(this);
+    m_modeLabel = createFormLabel(this);
+    m_maxSnoozeLabel = createFormLabel(this);
+    m_snoozeLabel = createFormLabel(this);
+    m_quietLabel = createFormLabel(this);
+
+    m_form->addRow(m_nameLabel, m_nameEdit);
+    m_form->addRow(m_kindLabel, m_kindCombo);
+    m_form->addRow(m_intervalLabel, m_intervalSpin);
+    m_form->addRow(m_breakDurationLabel, m_breakDurationSpin);
+    m_form->addRow(m_modeLabel, m_modeCombo);
+    m_form->addRow(m_maxSnoozeLabel, m_maxSnoozeSpin);
+    m_form->addRow(m_snoozeLabel, m_snoozeSpin);
+    m_form->addRow(m_quietLabel, m_quietCombo);
     m_form->addRow(QString(), m_requireConfirmationCheck);
     m_form->addRow(QString(), m_allowSkipCheck);
     m_form->addRow(QString(), m_enabledCheck);
@@ -130,27 +152,24 @@ void ProfileDialog::changeEvent(QEvent *event)
 
 void ProfileDialog::retranslateUi()
 {
-    const auto setLabelText = [this](QWidget *field, const QString &text) {
-        if (auto *label = qobject_cast<QLabel *>(m_form->labelForField(field))) {
-            label->setText(text);
-        }
-    };
-
     setWindowTitle(m_existingId == 0 ? tr("Create profile") : tr("Edit profile"));
-    setLabelText(m_nameEdit, tr("Name"));
-    setLabelText(m_kindCombo, tr("Kind"));
-    setLabelText(m_intervalSpin, tr("Interval (minutes)"));
-    setLabelText(m_breakDurationSpin, tr("Break duration (minutes)"));
-    setLabelText(m_modeCombo, tr("Reminder mode"));
-    setLabelText(m_maxSnoozeSpin, tr("Max snoozes"));
-    setLabelText(m_snoozeSpin, tr("Snooze minutes"));
-    setLabelText(m_quietCombo, tr("Quiet hours policy"));
+    m_nameLabel->setText(tr("Name"));
+    m_kindLabel->setText(tr("Kind"));
+    m_intervalLabel->setText(tr("Interval (minutes)"));
+    m_breakDurationLabel->setText(tr("Break duration (minutes)"));
+    m_modeLabel->setText(tr("Reminder mode"));
+    m_maxSnoozeLabel->setText(tr("Max snoozes"));
+    m_snoozeLabel->setText(tr("Snooze minutes"));
+    m_quietLabel->setText(tr("Quiet hours policy"));
     m_kindCombo->setItemText(0, displayProfileKind(domain::ProfileKind::Break, this));
     m_kindCombo->setItemText(1, displayProfileKind(domain::ProfileKind::Generic, this));
     m_kindCombo->setItemText(2, displayProfileKind(domain::ProfileKind::Mixed, this));
     m_modeCombo->setItemText(0, displaySeverityMode(domain::SeverityMode::Soft, this));
     m_modeCombo->setItemText(1, displaySeverityMode(domain::SeverityMode::Persistent, this));
     m_modeCombo->setItemText(2, displaySeverityMode(domain::SeverityMode::Break, this));
+    if (m_quietCombo->count() > 0) {
+        m_quietCombo->setItemText(0, tr("No quiet hours"));
+    }
     m_requireConfirmationCheck->setText(tr("Require post-break confirmation"));
     m_allowSkipCheck->setText(tr("Allow skip"));
     m_enabledCheck->setText(tr("Enabled"));
