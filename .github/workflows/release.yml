@@ -49,7 +49,15 @@ jobs:
           & $qtBinPath build/deadliner.exe --release --no-translations
 
       - name: Install NSIS
-        run: choco install nsis -y
+        shell: pwsh
+        run: |
+          choco install nsis -y
+          $nsisPath = Join-Path ${env:ProgramFiles(x86)} 'NSIS'
+          if (-Not (Test-Path (Join-Path $nsisPath 'makensis.exe'))) {
+            Write-Error "makensis.exe not found after NSIS installation"
+            exit 1
+          }
+          Add-Content -Path $env:GITHUB_PATH -Value $nsisPath
 
       - name: Create NSIS installer
         shell: pwsh
@@ -58,7 +66,19 @@ jobs:
           Copy-Item -Force LICENSE build/LICENSE
           Copy-Item -Force README.md build/README.md
           Push-Location build
-          makensis installer.nsi
+          $makensis = (Get-Command makensis -ErrorAction SilentlyContinue).Source
+          if (-Not $makensis) {
+            $candidatePaths = @(
+              (Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'),
+              (Join-Path $env:ProgramFiles 'NSIS\makensis.exe')
+            )
+            $makensis = $candidatePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+          }
+          if (-Not $makensis) {
+            Write-Error "makensis.exe is not available in PATH or default NSIS install locations"
+            exit 1
+          }
+          & $makensis installer.nsi
           Pop-Location
 
       - name: Package portable ZIP
