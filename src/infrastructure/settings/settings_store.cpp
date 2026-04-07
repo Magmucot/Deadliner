@@ -81,6 +81,7 @@ domain::AppSettings SettingsStore::load() const
     settings.defaultProfileId = m_settings.value(QStringLiteral("general/default_profile_id"), 0).toLongLong();
     settings.pauseUntil = m_settings.value(QStringLiteral("general/pause_until")).toDateTime();
     settings.logLevel = m_settings.value(QStringLiteral("debug/log_level"), settings.logLevel).toString();
+    settings.trayIcon = m_settings.value(QStringLiteral("ui/tray_icon"), settings.trayIcon).toString();
 
     if (storedLanguage != settings.language || storedTheme != settings.theme) {
         needsMigrationSave = true;
@@ -105,6 +106,7 @@ void SettingsStore::save(const domain::AppSettings &settings) const
     m_settings.setValue(QStringLiteral("ui/last_window_geometry"), settings.lastWindowGeometry);
     m_settings.setValue(QStringLiteral("ui/language"), canonicalLanguage(settings.language));
     m_settings.setValue(QStringLiteral("ui/theme"), canonicalTheme(settings.theme));
+    m_settings.setValue(QStringLiteral("ui/tray_icon"), settings.trayIcon);
     m_settings.setValue(QStringLiteral("general/launch_on_startup"), settings.launchOnStartup);
     m_settings.setValue(QStringLiteral("general/start_minimized"), settings.startMinimized);
     m_settings.setValue(QStringLiteral("general/onboarding_completed"), settings.onboardingCompleted);

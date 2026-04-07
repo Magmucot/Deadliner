@@ -22,6 +22,7 @@ public:
     void show();
     void showMessage(const QString &title, const QString &message);
     void retranslateUi();
+    void setIcon(const QString &iconVariant);
 
 signals:
     void openMainWindowRequested();

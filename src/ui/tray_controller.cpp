@@ -6,6 +6,7 @@
 #include <QDBusConnectionInterface>
 #include <QDBusMessage>
 #include <QDBusReply>
+#include <QIcon>
 #include <QMenu>
 #include <QStyle>
 #include <QSystemTrayIcon>
@@ -18,7 +19,7 @@ TrayController::TrayController(QObject *parent)
     , m_tray(new QSystemTrayIcon(this))
     , m_menu(new QMenu())
 {
-    m_tray->setIcon(QApplication::style()->standardIcon(QStyle::SP_ComputerIcon));
+    setIcon(QStringLiteral("variant1"));
     m_showAction = m_menu->addAction(QString());
     m_eventsAction = m_menu->addAction(QString());
     m_profilesAction = m_menu->addAction(QString());
@@ -136,6 +137,23 @@ void TrayController::retranslateUi()
     m_pauseTomorrowAction->setText(tr("Pause until tomorrow"));
     m_skipNextAction->setText(tr("Skip next reminder"));
     m_quitAction->setText(tr("Quit"));
+}
+
+void TrayController::setIcon(const QString &iconVariant)
+{
+    QString iconPath;
+    if (iconVariant == QStringLiteral("variant2")) {
+        iconPath = QStringLiteral(":/icons/icons/icon_variant2.png");
+    } else {
+        iconPath = QStringLiteral(":/icons/icons/icon_variant1.png");
+    }
+    
+    QIcon icon(iconPath);
+    if (!icon.isNull()) {
+        m_tray->setIcon(icon);
+    } else {
+        m_tray->setIcon(QApplication::style()->standardIcon(QStyle::SP_ComputerIcon));
+    }
 }
 
 }  // namespace deadliner::ui

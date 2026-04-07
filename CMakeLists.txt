@@ -20,6 +20,10 @@ set(DEADLINER_TS_FILES
     resources/i18n/deadliner_ru.ts
 )
 
+set(DEADLINER_RESOURCES
+    resources/icons.qrc
+)
+
 add_library(deadliner_core
     src/domain/models.h
     src/domain/logic.h
@@ -70,6 +74,7 @@ add_library(deadliner_core
     src/app/app_controller.h
     src/app/app_controller.cpp
     ${DEADLINER_TS_FILES}
+    ${DEADLINER_RESOURCES}
 )
 
 target_include_directories(deadliner_core PUBLIC src)

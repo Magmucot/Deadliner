@@ -94,6 +94,7 @@ bool AppController::initialize()
     refreshState();
 
     if (m_trayController.isAvailable()) {
+        m_trayController.setIcon(m_settings.trayIcon);
         m_trayController.show();
     }
 
@@ -509,6 +510,7 @@ void AppController::applyAppearanceSettings()
 {
     m_languageManager.applyLanguage(m_settings.language);
     ui::applyTheme(*qobject_cast<QApplication *>(qApp), m_settings.theme);
+    m_trayController.setIcon(m_settings.trayIcon);
     m_trayController.retranslateUi();
 }
 

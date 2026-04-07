@@ -148,6 +148,7 @@ struct AppSettings {
     qint64 defaultProfileId = 0;
     QDateTime pauseUntil;
     QString logLevel = QStringLiteral("info");
+    QString trayIcon = QStringLiteral("variant1");
 };
 
 struct QuietHoursDecision {
