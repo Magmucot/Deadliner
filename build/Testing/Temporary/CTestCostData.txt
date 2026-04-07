@@ -1,3 +1,0 @@
-deadliner_domain_tests 19 0.00122226
-deadliner_repository_tests 18 0.000896231
----

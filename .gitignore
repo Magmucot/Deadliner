@@ -39,3 +39,19 @@
 
 # debug information files
 *.dwo
+
+# Build artifacts
+/build/
+/build_test/
+/Testing/
+
+# CMake / Ninja local files
+/CMakeCache.txt
+/CMakeFiles/
+/cmake_install.cmake
+/build.ninja
+/.ninja_deps
+/.ninja_log
+
+# Tool caches
+/.ruff_cache/
