@@ -1,0 +1,8 @@
+set(__QT_DEPLOY_TARGET_deadliner_core_FILE /home/magus/code/projects/Deadliner/build/libdeadliner_core.a)
+set(__QT_DEPLOY_TARGET_deadliner_core_TYPE STATIC_LIBRARY)
+set(__QT_DEPLOY_TARGET_deadliner_FILE /home/magus/code/projects/Deadliner/build/deadliner)
+set(__QT_DEPLOY_TARGET_deadliner_TYPE EXECUTABLE)
+set(__QT_DEPLOY_TARGET_deadliner_domain_tests_FILE /home/magus/code/projects/Deadliner/build/deadliner_domain_tests)
+set(__QT_DEPLOY_TARGET_deadliner_domain_tests_TYPE EXECUTABLE)
+set(__QT_DEPLOY_TARGET_deadliner_repository_tests_FILE /home/magus/code/projects/Deadliner/build/deadliner_repository_tests)
+set(__QT_DEPLOY_TARGET_deadliner_repository_tests_TYPE EXECUTABLE)

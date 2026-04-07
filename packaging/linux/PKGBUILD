@@ -1,0 +1,20 @@
+pkgname=deadliner
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Cross-platform desktop reminder and break app built with Qt 6"
+arch=('x86_64')
+url="https://example.invalid/deadliner"
+license=('custom')
+depends=('qt6-base' 'sqlite')
+makedepends=('cmake' 'ninja')
+source=()
+sha256sums=()
+
+build() {
+  cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+  cmake --build build
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+}

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Deadliner
+Comment=Desktop break and reminder utility
+Exec=deadliner
+Terminal=false
+Categories=Utility;Office;
+StartupNotify=true

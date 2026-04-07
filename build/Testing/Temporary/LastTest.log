@@ -1,0 +1,52 @@
+Start testing: Apr 07 00:16 +07
+----------------------------------------------------------
+1/2 Testing: deadliner_domain_tests
+1/2 Test: deadliner_domain_tests
+Command: "/home/magus/code/projects/Deadliner/build/deadliner_domain_tests"
+Directory: /home/magus/code/projects/Deadliner/build
+"deadliner_domain_tests" start time: Apr 07 00:16 +07
+Output:
+----------------------------------------------------------
+********* Start testing of DomainTests *********
+Config: Using QtTest library 6.11.0, Qt 6.11.0 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 15.2.1 20260209), cachyos unknown
+PASS   : DomainTests::initTestCase()
+PASS   : DomainTests::dailyRecurrence()
+PASS   : DomainTests::weekdaysRecurrence()
+PASS   : DomainTests::quietHoursAcrossMidnight()
+PASS   : DomainTests::snoozeLimits()
+PASS   : DomainTests::statsAggregation()
+PASS   : DomainTests::cleanupTestCase()
+Totals: 7 passed, 0 failed, 0 skipped, 0 blacklisted, 4ms
+********* Finished testing of DomainTests *********
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"deadliner_domain_tests" end time: Apr 07 00:16 +07
+"deadliner_domain_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/2 Testing: deadliner_repository_tests
+2/2 Test: deadliner_repository_tests
+Command: "/home/magus/code/projects/Deadliner/build/deadliner_repository_tests"
+Directory: /home/magus/code/projects/Deadliner/build
+"deadliner_repository_tests" start time: Apr 07 00:16 +07
+Output:
+----------------------------------------------------------
+********* Start testing of RepositoryTests *********
+Config: Using QtTest library 6.11.0, Qt 6.11.0 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 15.2.1 20260209), cachyos unknown
+PASS   : RepositoryTests::initTestCase()
+PASS   : RepositoryTests::opensAndSeeds()
+PASS   : RepositoryTests::savesAndLoadsEvent()
+PASS   : RepositoryTests::cleanupTestCase()
+Totals: 4 passed, 0 failed, 0 skipped, 0 blacklisted, 8ms
+********* Finished testing of RepositoryTests *********
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"deadliner_repository_tests" end time: Apr 07 00:16 +07
+"deadliner_repository_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Apr 07 00:16 +07
