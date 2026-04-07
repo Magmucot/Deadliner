@@ -3,7 +3,7 @@ name: Build Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
 
 jobs:
@@ -14,56 +14,70 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
-          version: '6.5.3'
-          host: 'windows'
-          target: 'desktop'
-          arch: 'win64_msvc2019_64'
-          modules: 'qtbase qtsql'
+          version: "6.5.3"
+          host: "windows"
+          target: "desktop"
+          arch: "win64_msvc2019_64"
+          modules: "qtbase qtsql"
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Configure CMake
-        run: cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}"
+        shell: pwsh
+        run: |
+          cmake -S . -B build -G "Ninja" `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}"
 
       - name: Build
         run: cmake --build build --config Release
 
       - name: Deploy Qt dependencies
+        shell: pwsh
         run: |
-          cd build
-          windeployqt deadliner.exe --release --no-translations
+          & "${{ env.Qt6_DIR }}/bin/windeployqt.exe" `
+            build/deadliner.exe --release --no-translations
 
       - name: Install NSIS
-        run: |
-          choco install nsis -y
-          
-      - name: Create NSIS Installer
-        run: |
-          cd build
-          Copy-Item -Recurse -Force ../packaging/windows/installer.nsi .
-          Copy-Item -Force ../LICENSE .
-          Copy-Item -Force ../README.md .
-          makensis installer.nsi
-          
-      - name: Package Windows ZIP (portable)
-        run: |
-          mkdir deadliner-windows-portable
-          cp build/deadliner.exe deadliner-windows-portable/
-          cp -r build/*.dll deadliner-windows-portable/ 2>$null || true
-          cp LICENSE deadliner-windows-portable/
-          cp README.md deadliner-windows-portable/
-          Compress-Archive -Path deadliner-windows-portable -DestinationPath deadliner-windows-x64-portable.zip
+        run: choco install nsis -y
 
-      - name: Upload Windows Installer
+      - name: Create NSIS installer
+        shell: pwsh
+        run: |
+          Copy-Item -Force packaging/windows/installer.nsi build/installer.nsi
+          Copy-Item -Force LICENSE build/LICENSE
+          Copy-Item -Force README.md build/README.md
+          Push-Location build
+          makensis installer.nsi
+          Pop-Location
+
+      - name: Package portable ZIP
+        shell: pwsh
+        run: |
+          $dest = "deadliner-windows-portable"
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          Copy-Item build/deadliner.exe $dest/
+          # Qt DLLs are deployed alongside the exe by windeployqt
+          Get-ChildItem build/*.dll -ErrorAction SilentlyContinue |
+            Copy-Item -Destination $dest/
+          # Qt plugin directories (platforms, styles, etc.)
+          Get-ChildItem build -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -ne 'CMakeFiles' } |
+            ForEach-Object { Copy-Item $_.FullName $dest/ -Recurse -Force }
+          Copy-Item LICENSE $dest/
+          Copy-Item README.md $dest/
+          Compress-Archive -Path $dest -DestinationPath deadliner-windows-x64-portable.zip
+
+      - name: Upload Windows installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: deadliner-windows-installer
           path: build/deadliner-installer.exe
-          
-      - name: Upload Windows Portable
+
+      - name: Upload Windows portable artifact
         uses: actions/upload-artifact@v4
         with:
           name: deadliner-windows-portable
@@ -74,30 +88,69 @@ jobs:
     container:
       image: archlinux:latest
     steps:
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm base-devel git cmake ninja qt6-base sqlite
+          # qt6-tools: required for Qt Linguist (.ts files in CMake)
+          # sudo: required so the non-root makepkg user can install deps
+          pacman -S --noconfirm \
+            base-devel git cmake ninja \
+            qt6-base qt6-tools \
+            sqlite sudo
 
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Build with CMake
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr
           cmake --build build
 
-      - name: Create PKGBUILD package
+      - name: Stage install tree
         run: |
-          cd packaging/linux
-          makepkg --noconfirm -sf
-          mv *.pkg.tar.zst ../../
+          DESTDIR="$PWD/pkg-root" cmake --install build
+          install -Dm644 packaging/linux/deadliner.desktop \
+            pkg-root/usr/share/applications/deadliner.desktop
+          # Icon file is optional; skip gracefully if not present
+          if [ -f packaging/linux/deadliner.png ]; then
+            install -Dm644 packaging/linux/deadliner.png \
+              pkg-root/usr/share/icons/hicolor/256x256/apps/deadliner.png
+          fi
+          install -Dm644 LICENSE pkg-root/usr/share/licenses/deadliner/LICENSE
 
-      - name: Upload Arch artifact
+      - name: Create portable tarball
+        run: |
+          tar -C pkg-root -czf deadliner-arch-x86_64.tar.gz .
+
+      - name: Build Arch package with makepkg
+        run: |
+          # makepkg refuses to run as root — create a dedicated build user
+          useradd -m builduser
+          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+          # Copy the full repo so builduser can access CMakeLists, sources, etc.
+          cp -r "$PWD" /home/builduser/deadliner
+          chown -R builduser:builduser /home/builduser/deadliner
+
+          su builduser -c \
+            "cd /home/builduser/deadliner/packaging/linux && makepkg --noconfirm -sf"
+
+          # Collect the produced package back into the workspace
+          mv /home/builduser/deadliner/packaging/linux/*.pkg.tar.zst ./ || true
+
+      - name: Upload Arch package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: deadliner-arch-x64
-          path: '*.pkg.tar.zst'
+          name: deadliner-arch-pkg
+          path: "*.pkg.tar.zst"
+
+      - name: Upload Arch tarball artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deadliner-arch-tarball
+          path: "deadliner-arch-x86_64.tar.gz"
 
   create-release:
     needs: [build-windows, build-arch]
@@ -107,14 +160,16 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             deadliner-windows-installer/deadliner-installer.exe
             deadliner-windows-portable/deadliner-windows-x64-portable.zip
-            deadliner-arch-x64/*.pkg.tar.zst
+            deadliner-arch-pkg/*.pkg.tar.zst
+            deadliner-arch-tarball/deadliner-arch-x86_64.tar.gz
           draft: false
           prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
