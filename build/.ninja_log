@@ -103,3 +103,14 @@
 2973	3195	1775539336347069886	deadliner_domain_tests	3ffc02b05391f003
 2973	3197	1775539336347158039	deadliner_repository_tests	8135361580ba6002
 2973	3206	1775539336346806522	deadliner	e88c4afdce592b8f
+8	385	1775547815966207362	deadliner_core_autogen/timestamp	2287c112c69cf52d
+8	385	1775547815966207362	deadliner_core_autogen/mocs_compilation.cpp	2287c112c69cf52d
+8	385	1775547815966207362	/home/magus/code/projects/Deadliner/build/deadliner_core_autogen/timestamp	2287c112c69cf52d
+8	385	1775547815966207362	/home/magus/code/projects/Deadliner/build/deadliner_core_autogen/mocs_compilation.cpp	2287c112c69cf52d
+386	2555	1775547815975907406	CMakeFiles/deadliner_core.dir/src/ui/main_window.cpp.o	554dc9a423cf3116
+386	2952	1775547815975996992	CMakeFiles/deadliner_core.dir/src/ui/today/today_page.cpp.o	c06eee67d70d5bcc
+385	2984	1775547815975734055	CMakeFiles/deadliner_core.dir/deadliner_core_autogen/mocs_compilation.cpp.o	73c5795477c4331c
+2985	3040	1775547818574168769	libdeadliner_core.a	d13bd6576dfc30b5
+3040	3309	1775547818630243189	deadliner_domain_tests	3ffc02b05391f003
+3040	3317	1775547818630360216	deadliner_repository_tests	8135361580ba6002
+3040	3320	1775547818629167953	deadliner	e88c4afdce592b8f
