@@ -3,18 +3,26 @@ pkgver=0.1.0
 pkgrel=1
 pkgdesc="Cross-platform desktop reminder and break app built with Qt 6"
 arch=('x86_64')
-url="https://example.invalid/deadliner"
+url="https://github.com/Magmucot/Deadliner"
 license=('custom')
 depends=('qt6-base' 'sqlite')
-makedepends=('cmake' 'ninja')
+makedepends=('cmake' 'ninja' 'qt6-tools')
 source=()
 sha256sums=()
 
 build() {
-  cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+  cd "$srcdir"
+  cmake -S ../../../ -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
   cmake --build build
 }
 
 package() {
+  cd "$srcdir"
   DESTDIR="$pkgdir" cmake --install build
+  
+  # Install desktop file
+  install -Dm644 ../../../packaging/linux/deadliner.desktop "$pkgdir/usr/share/applications/deadliner.desktop"
+  
+  # Install license
+  install -Dm644 ../../../LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
