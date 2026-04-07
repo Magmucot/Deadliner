@@ -8,6 +8,7 @@
 class QLabel;
 class QTableWidget;
 class QPushButton;
+class QTimer;
 
 namespace deadliner::ui
 {
@@ -30,6 +31,8 @@ namespace deadliner::ui
 
     protected:
         void changeEvent(QEvent *event) override;
+        void showEvent(QShowEvent *event) override;
+        void hideEvent(QHideEvent *event) override;
 
     private:
         void retranslateUi();
@@ -50,6 +53,7 @@ namespace deadliner::ui
         QTableWidget *m_eventsTable = nullptr;
         QPushButton *m_manageProfilesButton = nullptr;
         QPushButton *m_manageEventsButton = nullptr;
+        QTimer *m_updateTimer = nullptr;
     };
 
 } // namespace deadliner::ui

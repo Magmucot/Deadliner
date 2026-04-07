@@ -12,6 +12,7 @@
 #include <QAbstractItemView>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QTimer>
 #include <QVBoxLayout>
 
 namespace deadliner::ui
@@ -102,6 +103,10 @@ namespace deadliner::ui
         connect(m_manageProfilesButton, &QPushButton::clicked, this, &TodayPage::openProfilesRequested);
         connect(m_manageEventsButton, &QPushButton::clicked, this, &TodayPage::openEventsRequested);
 
+        m_updateTimer = new QTimer(this);
+        m_updateTimer->setInterval(1000);
+        connect(m_updateTimer, &QTimer::timeout, this, &TodayPage::refreshDynamicContent);
+
         retranslateUi();
     }
 
@@ -125,6 +130,24 @@ namespace deadliner::ui
             refreshDynamicContent();
         }
         QWidget::changeEvent(event);
+    }
+
+    void TodayPage::showEvent(QShowEvent *event)
+    {
+        QWidget::showEvent(event);
+        if (m_updateTimer && !m_updateTimer->isActive())
+        {
+            m_updateTimer->start();
+        }
+    }
+
+    void TodayPage::hideEvent(QHideEvent *event)
+    {
+        QWidget::hideEvent(event);
+        if (m_updateTimer && m_updateTimer->isActive())
+        {
+            m_updateTimer->stop();
+        }
     }
 
     void TodayPage::retranslateUi()
