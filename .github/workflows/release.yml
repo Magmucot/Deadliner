@@ -35,21 +35,39 @@ jobs:
         run: |
           cd build
           windeployqt deadliner.exe --release --no-translations
-          
-      - name: Package Windows
-        run: |
-          mkdir deadliner-windows
-          cp build/deadliner.exe deadliner-windows/
-          cp -r build/*.dll deadliner-windows/ 2>$null || true
-          cp LICENSE deadliner-windows/
-          cp README.md deadliner-windows/
-          Compress-Archive -Path deadliner-windows -DestinationPath deadliner-windows-x64.zip
 
-      - name: Upload Windows artifact
+      - name: Install NSIS
+        run: |
+          choco install nsis -y
+          
+      - name: Create NSIS Installer
+        run: |
+          cd build
+          Copy-Item -Recurse -Force ../packaging/windows/installer.nsi .
+          Copy-Item -Force ../LICENSE .
+          Copy-Item -Force ../README.md .
+          makensis installer.nsi
+          
+      - name: Package Windows ZIP (portable)
+        run: |
+          mkdir deadliner-windows-portable
+          cp build/deadliner.exe deadliner-windows-portable/
+          cp -r build/*.dll deadliner-windows-portable/ 2>$null || true
+          cp LICENSE deadliner-windows-portable/
+          cp README.md deadliner-windows-portable/
+          Compress-Archive -Path deadliner-windows-portable -DestinationPath deadliner-windows-x64-portable.zip
+
+      - name: Upload Windows Installer
         uses: actions/upload-artifact@v4
         with:
-          name: deadliner-windows-x64
-          path: deadliner-windows-x64.zip
+          name: deadliner-windows-installer
+          path: build/deadliner-installer.exe
+          
+      - name: Upload Windows Portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: deadliner-windows-portable
+          path: deadliner-windows-x64-portable.zip
 
   build-arch:
     runs-on: ubuntu-latest
@@ -93,7 +111,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            deadliner-windows-x64/deadliner-windows-x64.zip
+            deadliner-windows-installer/deadliner-installer.exe
+            deadliner-windows-portable/deadliner-windows-x64-portable.zip
             deadliner-arch-x64/*.pkg.tar.zst
           draft: false
           prerelease: false
