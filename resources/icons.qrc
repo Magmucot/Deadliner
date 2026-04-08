@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/icons">
-        <file>icons/icon_variant1_256.png</file>
-        <file>icons/icon_variant2_256.png</file>
+        <file>icons/icon_variant1.ico</file>
+        <file>icons/icon_variant2.ico</file>
     </qresource>
 </RCC>
