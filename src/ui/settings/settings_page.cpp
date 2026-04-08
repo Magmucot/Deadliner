@@ -64,22 +64,22 @@ namespace deadliner::ui
         m_closeToTrayCheckbox = new QCheckBox(this);
         m_languageCombo = new QComboBox(this);
         m_themeCombo = new QComboBox(this);
-        
-        // Create icon selection with preview
+
         m_iconVariant1Radio = new QRadioButton(this);
         m_iconVariant1Radio->setIcon(QIcon(QStringLiteral(":/icons/icons/icon_variant1_256.png")));
         m_iconVariant1Radio->setIconSize(QSize(64, 64));
         m_iconVariant1Radio->setChecked(true);
-        
+
         m_iconVariant2Radio = new QRadioButton(this);
         m_iconVariant2Radio->setIcon(QIcon(QStringLiteral(":/icons/icons/icon_variant2_256.png")));
         m_iconVariant2Radio->setIconSize(QSize(64, 64));
-        
+
         auto *iconLayout = new QHBoxLayout();
         iconLayout->addWidget(m_iconVariant1Radio);
         iconLayout->addWidget(m_iconVariant2Radio);
         iconLayout->addStretch();
-        
+
+        m_trayIconLabel = createFormLabel(this);
         m_defaultProfileCombo = new QComboBox(this);
         m_pauseUntilEdit = new QDateTimeEdit(this);
         m_pauseUntilEdit->setCalendarPopup(true);
@@ -96,7 +96,7 @@ namespace deadliner::ui
         m_form->addRow(m_closeToTrayCheckbox);
         m_form->addRow(createFormLabel(this), m_languageCombo);
         m_form->addRow(createFormLabel(this), m_themeCombo);
-        m_form->addRow(createFormLabel(this), iconLayout);
+        m_form->addRow(m_trayIconLabel, iconLayout);
         m_form->addRow(createFormLabel(this), m_defaultProfileCombo);
         m_form->addRow(createFormLabel(this), m_pauseUntilEdit);
         m_form->addRow(createFormLabel(this), m_quietStartEdit);
@@ -204,15 +204,9 @@ namespace deadliner::ui
         m_saveButton->setText(tr("Save"));
         setLabelText(m_languageCombo, tr("Language"));
         setLabelText(m_themeCombo, tr("Theme"));
-        
-        // Set label for icon radio buttons layout
-        if (auto *label = qobject_cast<QLabel *>(m_form->labelForField(m_iconVariant1Radio->parentWidget()))) {
-            label->setText(tr("Tray icon"));
-        }
-        
+        m_trayIconLabel->setText(tr("Tray icon"));
         m_iconVariant1Radio->setText(tr("Variant 1"));
         m_iconVariant2Radio->setText(tr("Variant 2"));
-        
         setLabelText(m_defaultProfileCombo, tr("Default profile"));
         setLabelText(m_pauseUntilEdit, tr("Pause reminders until"));
         setLabelText(m_quietStartEdit, tr("Quiet hours start"));
@@ -266,6 +260,9 @@ namespace deadliner::ui
         const QSignalBlocker languageBlocker(m_languageCombo);
         const QSignalBlocker themeBlocker(m_themeCombo);
         const QSignalBlocker profileBlocker(m_defaultProfileCombo);
+        const QSignalBlocker softBehaviorBlocker(m_softBehaviorCombo);
+        const QSignalBlocker persistentBehaviorBlocker(m_persistentBehaviorCombo);
+        const QSignalBlocker breakBehaviorBlocker(m_breakBehaviorCombo);
 
         const int languageIndex = m_languageCombo->findData(m_settings.language);
         m_languageCombo->setCurrentIndex(languageIndex >= 0 ? languageIndex : 0);
@@ -273,10 +270,12 @@ namespace deadliner::ui
         const int themeIndex = m_themeCombo->findData(m_settings.theme);
         m_themeCombo->setCurrentIndex(themeIndex >= 0 ? themeIndex : 0);
 
-        // Set icon radio buttons based on settings
-        if (m_settings.trayIcon == QStringLiteral("variant2")) {
+        if (m_settings.trayIcon == QStringLiteral("variant2"))
+        {
             m_iconVariant2Radio->setChecked(true);
-        } else {
+        }
+        else
+        {
             m_iconVariant1Radio->setChecked(true);
         }
 
@@ -289,6 +288,14 @@ namespace deadliner::ui
         if (profileIndex >= 0)
         {
             m_defaultProfileCombo->setCurrentIndex(profileIndex);
+        }
+
+        if (!m_policies.isEmpty())
+        {
+            const auto &policy = m_policies.constFirst();
+            m_softBehaviorCombo->setCurrentIndex(m_softBehaviorCombo->findData(QVariant::fromValue(policy.behaviorSoft)));
+            m_persistentBehaviorCombo->setCurrentIndex(m_persistentBehaviorCombo->findData(QVariant::fromValue(policy.behaviorPersistent)));
+            m_breakBehaviorCombo->setCurrentIndex(m_breakBehaviorCombo->findData(QVariant::fromValue(policy.behaviorBreak)));
         }
     }
 

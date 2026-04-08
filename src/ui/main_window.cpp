@@ -80,7 +80,6 @@ namespace deadliner::ui
         // Frame and scrollbar handled by global QSS; disable the built-in frame.
         m_navigationList->setFrameShape(QFrame::NoFrame);
         m_navigationList->setSpacing(2);
-        m_navigationList->setUniformItemSizes(true);
         m_navigationList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
         sidebarLayout->addWidget(brandLabel);
@@ -225,7 +224,9 @@ namespace deadliner::ui
         {
             for (const auto &title : titles)
             {
-                m_navigationList->addItem(title);
+                auto *item = new QListWidgetItem(title);
+                item->setSizeHint(QSize(0, 40));
+                m_navigationList->addItem(item);
             }
         }
         else
@@ -233,6 +234,7 @@ namespace deadliner::ui
             for (int i = 0; i < titles.size(); ++i)
             {
                 m_navigationList->item(i)->setText(titles.at(i));
+                m_navigationList->item(i)->setSizeHint(QSize(0, 40));
             }
         }
 

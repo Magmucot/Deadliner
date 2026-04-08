@@ -13,7 +13,7 @@ set(CMAKE_AUTORCC ON)
 include(GNUInstallDirs)
 include(CTest)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Sql DBus Test)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Sql DBus Test LinguistTools)
 
 set(DEADLINER_TS_FILES
     resources/i18n/deadliner_en.ts
@@ -75,7 +75,6 @@ add_library(deadliner_core
     src/ui/widgets/empty_state_widget.cpp
     src/app/app_controller.h
     src/app/app_controller.cpp
-    ${DEADLINER_TS_FILES}
     ${DEADLINER_RESOURCES}
 )
 
@@ -88,6 +87,10 @@ target_link_libraries(deadliner_core
         Qt6::Gui
         Qt6::Widgets
         Qt6::Sql
+)
+
+qt_add_translations(deadliner_core
+    TS_FILES ${DEADLINER_TS_FILES}
 )
 
 qt_add_executable(deadliner

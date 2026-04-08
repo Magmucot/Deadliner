@@ -50,6 +50,7 @@ namespace deadliner::ui
         QLabel *m_titleLabel = nullptr;
         QLabel *m_subtitleLabel = nullptr;
         QLabel *m_platformNoteLabel = nullptr;
+        QLabel *m_trayIconLabel = nullptr;
         QCheckBox *m_launchCheckbox = nullptr;
         QCheckBox *m_startMinimizedCheckbox = nullptr;
         QCheckBox *m_minimizeToTrayCheckbox = nullptr;
