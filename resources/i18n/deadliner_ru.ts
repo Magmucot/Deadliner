@@ -447,6 +447,10 @@
             <translation>Пора!</translation>
         </message>
         <message>
+            <source>Review one-time reminders that are already past due.</source>
+            <translation>Просмотрите одноразовые напоминания, которые уже просрочены.</translation>
+        </message>
+        <message>
             <source>Close to tray</source>
             <translation>Закрывать в трей</translation>
         </message>
@@ -587,6 +591,10 @@
             <translation>Доброе утро</translation>
         </message>
         <message>
+            <source>If a recurring event was missed, skip it and schedule the next occurrence</source>
+            <translation>Если повторяющееся событие пропущено, пропустить его и запланировать следующее</translation>
+        </message>
+        <message>
             <source>Manage events</source>
             <translation>Управление</translation>
         </message>
@@ -601,6 +609,22 @@
         <message>
             <source>No break scheduled</source>
             <translation>Нет перерывов</translation>
+        </message>
+        <message>
+            <source>No overdue reminders.</source>
+            <translation>Нет просроченных напоминаний.</translation>
+        </message>
+        <message>
+            <source>One-time reminders that were missed and now need manual review.</source>
+            <translation>Одноразовые напоминания, которые были пропущены и требуют ручной проверки.</translation>
+        </message>
+        <message>
+            <source>Overdue</source>
+            <translation>Просрочено</translation>
+        </message>
+        <message>
+            <source>Overdue by</source>
+            <translation>Просрочено на</translation>
         </message>
         <message>
             <source>Time</source>
@@ -637,6 +661,22 @@
         <message>
             <source>Start break now</source>
             <translation>Начать перерыв</translation>
+        </message>
+        <message>
+            <source>When a one-time reminder is missed, it will appear here instead of firing automatically.</source>
+            <translation>Когда одноразовое напоминание пропущено, оно появится здесь вместо автоматического срабатывания.</translation>
+        </message>
+        <message>
+            <source>%1 d %2 h late</source>
+            <translation>%1 дн %2 ч назад</translation>
+        </message>
+        <message>
+            <source>%1 h %2 min late</source>
+            <translation>%1 ч %2 мин назад</translation>
+        </message>
+        <message>
+            <source>%1 min late</source>
+            <translation>%1 мин назад</translation>
         </message>
     </context>
 </TS>

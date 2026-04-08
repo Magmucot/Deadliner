@@ -447,6 +447,10 @@
             <translation>Reminder is due.</translation>
         </message>
         <message>
+            <source>Review one-time reminders that are already past due.</source>
+            <translation>Review one-time reminders that are already past due.</translation>
+        </message>
+        <message>
             <source>Close to tray</source>
             <translation>Close to tray</translation>
         </message>
@@ -587,6 +591,10 @@
             <translation>Good morning</translation>
         </message>
         <message>
+            <source>If a recurring event was missed, skip it and schedule the next occurrence</source>
+            <translation>If a recurring event was missed, skip it and schedule the next occurrence</translation>
+        </message>
+        <message>
             <source>Manage events</source>
             <translation>Manage events</translation>
         </message>
@@ -601,6 +609,22 @@
         <message>
             <source>No break scheduled</source>
             <translation>No break scheduled</translation>
+        </message>
+        <message>
+            <source>No overdue reminders.</source>
+            <translation>No overdue reminders.</translation>
+        </message>
+        <message>
+            <source>One-time reminders that were missed and now need manual review.</source>
+            <translation>One-time reminders that were missed and now need manual review.</translation>
+        </message>
+        <message>
+            <source>Overdue</source>
+            <translation>Overdue</translation>
+        </message>
+        <message>
+            <source>Overdue by</source>
+            <translation>Overdue by</translation>
         </message>
         <message>
             <source>Time</source>
@@ -637,6 +661,22 @@
         <message>
             <source>Start break now</source>
             <translation>Start break now</translation>
+        </message>
+        <message>
+            <source>When a one-time reminder is missed, it will appear here instead of firing automatically.</source>
+            <translation>When a one-time reminder is missed, it will appear here instead of firing automatically.</translation>
+        </message>
+        <message>
+            <source>%1 d %2 h late</source>
+            <translation>%1 d %2 h late</translation>
+        </message>
+        <message>
+            <source>%1 h %2 min late</source>
+            <translation>%1 h %2 min late</translation>
+        </message>
+        <message>
+            <source>%1 min late</source>
+            <translation>%1 min late</translation>
         </message>
     </context>
 </TS>

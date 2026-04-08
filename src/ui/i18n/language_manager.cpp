@@ -64,6 +64,7 @@ namespace deadliner::ui
             // Navigation
             {QStringLiteral("*\nToday"), QStringLiteral("Сегодня")},
             {QStringLiteral("*\nEvents"), QStringLiteral("События")},
+            {QStringLiteral("*\nOverdue"), QStringLiteral("Просрочено")},
             {QStringLiteral("*\nProfiles"), QStringLiteral("Профили")},
             {QStringLiteral("*\nStatistics"), QStringLiteral("Статистика")},
             {QStringLiteral("*\nSettings"), QStringLiteral("Настройки")},
@@ -75,6 +76,8 @@ namespace deadliner::ui
              QStringLiteral("Обзор предстоящих напоминаний, активных профилей и событий сегодня.")},
             {QStringLiteral("*\nManage one-time and recurring reminders."),
              QStringLiteral("Управление разовыми и регулярными напоминаниями.")},
+            {QStringLiteral("*\nReview one-time reminders that are already past due."),
+             QStringLiteral("Просмотрите одноразовые напоминания, которые уже просрочены.")},
             {QStringLiteral("*\nTune reminder modes, break duration and snooze rules."),
              QStringLiteral("Настройка режимов напоминаний, длительности перерывов и правил откладывания.")},
             {QStringLiteral("*\nCheck local reminder outcomes and adherence trends."),
@@ -107,10 +110,15 @@ namespace deadliner::ui
 
             // Time / due labels
             {QStringLiteral("*\nNot scheduled"), QStringLiteral("Не запланировано")},
+            {QStringLiteral("*\nDue at"), QStringLiteral("Срок")},
             {QStringLiteral("*\nDue now"), QStringLiteral("Сейчас")},
             {QStringLiteral("*\nIn %1 min"), QStringLiteral("Через %1 мин")},
             {QStringLiteral("*\nIn %1 h %2 min"), QStringLiteral("Через %1 ч %2 мин")},
             {QStringLiteral("*\nIn %1 d %2 h"), QStringLiteral("Через %1 д %2 ч")},
+            {QStringLiteral("*\nOverdue by"), QStringLiteral("Просрочено на")},
+            {QStringLiteral("*\n%1 min late"), QStringLiteral("%1 мин назад")},
+            {QStringLiteral("*\n%1 h %2 min late"), QStringLiteral("%1 ч %2 мин назад")},
+            {QStringLiteral("*\n%1 d %2 h late"), QStringLiteral("%1 дн %2 ч назад")},
             {QStringLiteral("*\nPaused until %1"), QStringLiteral("Пауза до %1")},
             {QStringLiteral("*\nReminders are active"), QStringLiteral("Напоминания активны")},
 
@@ -144,6 +152,7 @@ namespace deadliner::ui
 
             // Empty states
             {QStringLiteral("*\nNo upcoming events."), QStringLiteral("Нет предстоящих событий.")},
+            {QStringLiteral("*\nNo overdue reminders."), QStringLiteral("Нет просроченных напоминаний.")},
             {QStringLiteral("*\nYou have no upcoming events."), QStringLiteral("У вас нет предстоящих событий.")},
             {QStringLiteral("*\nNo reminder profiles yet."), QStringLiteral("Пока нет профилей напоминаний.")},
             {QStringLiteral("*\nNo statistics yet."), QStringLiteral("Пока нет статистики.")},
@@ -556,6 +565,8 @@ namespace deadliner::ui
             {QStringLiteral("*\nStart at / anchor"), QStringLiteral("Время начала / отсчёта")},
             {QStringLiteral("*\nRecurrence"), QStringLiteral("Повторение")},
             {QStringLiteral("*\nOne-time event"), QStringLiteral("Разовое событие")},
+            {QStringLiteral("*\nIf a recurring event was missed, skip it and schedule the next occurrence"),
+             QStringLiteral("Если повторяющееся событие пропущено, пропустить его и запланировать следующее")},
             {QStringLiteral("*\nMode: %1\nSnooze: %2 x %3 min\nBreak: %4 min"),
              QStringLiteral("Режим: %1\nОткладывание: %2 x %3 мин\nПерерыв: %4 мин")},
             {QStringLiteral("*\nRequire post-break confirmation"),
@@ -583,6 +594,12 @@ namespace deadliner::ui
              QStringLiteral("Пропустить следующее напоминание")},
             {QStringLiteral("*\nSkipped next reminder: %1"),
              QStringLiteral("Пропущено следующее напоминание: %1")},
+
+            // Overdue page
+            {QStringLiteral("*\nOne-time reminders that were missed and now need manual review."),
+             QStringLiteral("Одноразовые напоминания, которые были пропущены и требуют ручной проверки.")},
+            {QStringLiteral("*\nWhen a one-time reminder is missed, it will appear here instead of firing automatically."),
+             QStringLiteral("Когда одноразовое напоминание пропущено, оно появится здесь вместо автоматического срабатывания.")},
 
             // Test event descriptions
             {QStringLiteral("*\nQuick soft reminder for notification popup testing."),
