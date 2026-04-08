@@ -15,6 +15,7 @@ class QStackedWidget;
 namespace deadliner::ui {
 
 class EventsPage;
+class OverduePage;
 class ProfilesPage;
 class SettingsPage;
 class StatisticsPage;
@@ -27,6 +28,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
     void setState(const QList<domain::ReminderEvent> &events,
+                  const QList<domain::ReminderEvent> &overdueEvents,
                   const QList<domain::ReminderProfile> &profiles,
                   const QList<domain::StatsDaily> &stats,
                   const QList<domain::ReminderOccurrence> &upcoming,
@@ -55,6 +57,7 @@ private:
     void syncNavigationSelection();
 
     QList<domain::ReminderEvent> m_events;
+    QList<domain::ReminderEvent> m_overdueEvents;
     QList<domain::ReminderProfile> m_profiles;
     QList<domain::StatsDaily> m_stats;
     QList<domain::ReminderOccurrence> m_upcoming;
@@ -70,6 +73,7 @@ private:
     QStackedWidget *m_pages = nullptr;
     TodayPage *m_todayPage = nullptr;
     EventsPage *m_eventsPage = nullptr;
+    OverduePage *m_overduePage = nullptr;
     ProfilesPage *m_profilesPage = nullptr;
     StatisticsPage *m_statisticsPage = nullptr;
     SettingsPage *m_settingsPage = nullptr;

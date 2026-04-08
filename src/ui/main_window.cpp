@@ -1,6 +1,7 @@
 #include "ui/main_window.h"
 
 #include "ui/events/events_page.h"
+#include "ui/overdue/overdue_page.h"
 #include "ui/profiles/profiles_page.h"
 #include "ui/settings/settings_page.h"
 #include "ui/statistics/statistics_page.h"
@@ -31,6 +32,8 @@ namespace deadliner::ui
                 return context->tr("Overview of upcoming reminders, active break profiles and today's events.");
             case MainSection::Events:
                 return context->tr("Manage one-time and recurring reminders.");
+            case MainSection::Overdue:
+                return context->tr("Review one-time reminders that are already past due.");
             case MainSection::Profiles:
                 return context->tr("Tune reminder modes, break duration and snooze rules.");
             case MainSection::Statistics:
@@ -98,12 +101,14 @@ namespace deadliner::ui
         m_pages = new QStackedWidget(contentWidget);
         m_todayPage = new TodayPage(m_pages);
         m_eventsPage = new EventsPage(m_pages);
+        m_overduePage = new OverduePage(m_pages);
         m_profilesPage = new ProfilesPage(m_pages);
         m_statisticsPage = new StatisticsPage(m_pages);
         m_settingsPage = new SettingsPage(m_pages);
 
         m_pages->addWidget(m_todayPage);
         m_pages->addWidget(m_eventsPage);
+        m_pages->addWidget(m_overduePage);
         m_pages->addWidget(m_profilesPage);
         m_pages->addWidget(m_statisticsPage);
         m_pages->addWidget(m_settingsPage);
@@ -133,6 +138,8 @@ namespace deadliner::ui
         connect(m_eventsPage, &EventsPage::addRequested, this, &MainWindow::addEventRequested);
         connect(m_eventsPage, &EventsPage::editRequested, this, &MainWindow::editEventRequested);
         connect(m_eventsPage, &EventsPage::deleteRequested, this, &MainWindow::deleteEventRequested);
+        connect(m_overduePage, &OverduePage::editRequested, this, &MainWindow::editEventRequested);
+        connect(m_overduePage, &OverduePage::deleteRequested, this, &MainWindow::deleteEventRequested);
         connect(m_profilesPage, &ProfilesPage::addRequested, this, &MainWindow::addProfileRequested);
         connect(m_profilesPage, &ProfilesPage::editRequested, this, &MainWindow::editProfileRequested);
         connect(m_profilesPage, &ProfilesPage::deleteRequested, this, &MainWindow::deleteProfileRequested);
@@ -143,6 +150,7 @@ namespace deadliner::ui
     }
 
     void MainWindow::setState(const QList<domain::ReminderEvent> &events,
+                              const QList<domain::ReminderEvent> &overdueEvents,
                               const QList<domain::ReminderProfile> &profiles,
                               const QList<domain::StatsDaily> &stats,
                               const QList<domain::ReminderOccurrence> &upcoming,
@@ -152,6 +160,7 @@ namespace deadliner::ui
                               bool hasTray)
     {
         m_events = events;
+        m_overdueEvents = overdueEvents;
         m_profiles = profiles;
         m_stats = stats;
         m_upcoming = upcoming;
@@ -162,6 +171,7 @@ namespace deadliner::ui
 
         m_todayPage->setState(events, profiles, upcoming, settings);
         m_eventsPage->setState(events, profiles);
+        m_overduePage->setState(overdueEvents, profiles, QDateTime::currentDateTime());
         m_profilesPage->setState(profiles);
         m_statisticsPage->setState(stats);
         m_settingsPage->setState(profiles, policies, settings, autostartEnabled, hasTray);
@@ -205,6 +215,7 @@ namespace deadliner::ui
         const QStringList titles = {
             tr("Today"),
             tr("Events"),
+            tr("Overdue"),
             tr("Profiles"),
             tr("Statistics"),
             tr("Settings"),

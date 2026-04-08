@@ -32,6 +32,7 @@ protected:
 private:
     void retranslateUi();
     void updateProfileSummary();
+    void updateRecurringOptions();
 
     QList<domain::ReminderProfile> m_profiles;
     qint64 m_existingId = 0;
@@ -50,6 +51,7 @@ private:
     QDateTimeEdit *m_startEdit = nullptr;
     QComboBox *m_recurrenceCombo = nullptr;
     QCheckBox *m_oneTimeCheck = nullptr;
+    QCheckBox *m_skipMissedCheck = nullptr;
     QCheckBox *m_enabledCheck = nullptr;
     QLabel *m_profileHintLabel = nullptr;
     QLabel *m_profileInfoLabel = nullptr;

@@ -62,6 +62,8 @@ EventDialog::EventDialog(const QList<domain::ReminderProfile> &profiles,
         m_recurrenceCombo->addItem(QString(), rule);
     }
     m_oneTimeCheck = new QCheckBox(this);
+    m_skipMissedCheck = new QCheckBox(this);
+    m_skipMissedCheck->setChecked(true);
     m_enabledCheck = new QCheckBox(this);
     m_enabledCheck->setChecked(true);
     m_profileHintLabel = new QLabel(this);
@@ -89,6 +91,7 @@ EventDialog::EventDialog(const QList<domain::ReminderProfile> &profiles,
     m_form->addRow(m_startFieldLabel, m_startEdit);
     m_form->addRow(m_recurrenceFieldLabel, m_recurrenceCombo);
     m_form->addRow(QString(), m_oneTimeCheck);
+    m_form->addRow(QString(), m_skipMissedCheck);
     m_form->addRow(QString(), m_enabledCheck);
 
     layout->addLayout(m_form);
@@ -109,12 +112,15 @@ EventDialog::EventDialog(const QList<domain::ReminderProfile> &profiles,
         m_startEdit->setDateTime(event->startAt);
         m_recurrenceCombo->setCurrentIndex(m_recurrenceCombo->findData(event->recurrenceRule));
         m_oneTimeCheck->setChecked(event->isOneTime);
+        m_skipMissedCheck->setChecked(event->skipMissedOccurrences);
         m_enabledCheck->setChecked(event->enabled);
     }
 
     connect(m_profileCombo, &QComboBox::currentIndexChanged, this, [this]() { updateProfileSummary(); });
+    connect(m_oneTimeCheck, &QCheckBox::toggled, this, [this]() { updateRecurringOptions(); });
     retranslateUi();
     updateProfileSummary();
+    updateRecurringOptions();
 }
 
 domain::ReminderEvent EventDialog::event() const
@@ -128,9 +134,11 @@ domain::ReminderEvent EventDialog::event() const
     item.startAt = m_startEdit->dateTime();
     item.recurrenceRule = m_recurrenceCombo->currentData().toString();
     item.isOneTime = m_oneTimeCheck->isChecked();
+    item.skipMissedOccurrences = m_skipMissedCheck->isChecked();
     item.enabled = m_enabledCheck->isChecked();
     if (item.isOneTime) {
         item.recurrenceRule = QStringLiteral("none");
+        item.skipMissedOccurrences = true;
     }
     return item;
 }
@@ -156,6 +164,7 @@ void EventDialog::retranslateUi()
     m_startFieldLabel->setText(tr("Start at / anchor"));
     m_recurrenceFieldLabel->setText(tr("Recurrence"));
     m_oneTimeCheck->setText(tr("One-time event"));
+    m_skipMissedCheck->setText(tr("If a recurring event was missed, skip it and schedule the next occurrence"));
     m_enabledCheck->setText(tr("Enabled"));
     m_saveButton->setText(tr("Save"));
     m_cancelButton->setText(tr("Cancel"));
@@ -182,6 +191,12 @@ void EventDialog::updateProfileSummary()
         }
     }
     m_profileInfoLabel->clear();
+}
+
+void EventDialog::updateRecurringOptions()
+{
+    const bool recurring = !m_oneTimeCheck->isChecked();
+    m_skipMissedCheck->setEnabled(recurring);
 }
 
 }  // namespace deadliner::ui

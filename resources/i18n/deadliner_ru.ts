@@ -35,6 +35,10 @@
             <translation>Смягчить</translation>
         </message>
         <message>
+            <source>Due at</source>
+            <translation>Срок</translation>
+        </message>
+        <message>
             <source>Due now</source>
             <translation>Сейчас</translation>
         </message>
@@ -139,12 +143,8 @@
             <translation>Сделайте перерыв от экрана</translation>
         </message>
         <message>
-            <source>Mode: %1
-Snooze: %2 x %3 min
-Break: %4 min</source>
-            <translation>Режим: %1
-Откладывание: %2 x %3 мин
-Перерыв: %4 мин</translation>
+            <source>%1 mode, snooze %2 x %3 min, break %4 min</source>
+            <translation>Режим %1, отложить %2 x %3 мин, перерыв %4 мин</translation>
         </message>
         <message>
             <source>Cancel</source>

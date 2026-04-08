@@ -10,6 +10,10 @@ class DomainTests : public QObject {
 private slots:
     void dailyRecurrence();
     void weekdaysRecurrence();
+    void oneTimePastEventIsOverdue();
+    void overdueEventIsNotSchedulable();
+    void recurringPastEventIsDetectedAsMissed();
+    void dailyRecurrenceUsesEventTimeZone();
     void quietHoursAcrossMidnight();
     void snoozeLimits();
     void statsAggregation();
@@ -38,6 +42,62 @@ void DomainTests::weekdaysRecurrence()
     const auto next = computeNextDateTimeOccurrence(event, QDateTime(QDate(2026, 4, 4), QTime(9, 0)));
     QCOMPARE(next.date().dayOfWeek(), 1);
     QCOMPARE(next.time(), QTime(11, 30));
+}
+
+void DomainTests::oneTimePastEventIsOverdue()
+{
+    ReminderEvent event;
+    event.enabled = true;
+    event.type = ReminderType::DateTime;
+    event.isOneTime = true;
+    event.startAt = QDateTime(QDate(2026, 4, 5), QTime(9, 0));
+
+    ReminderProfile profile;
+    QVERIFY(isOverdueEvent(event, profile, QDateTime(QDate(2026, 4, 5), QTime(10, 0))));
+}
+
+void DomainTests::overdueEventIsNotSchedulable()
+{
+    ReminderEvent event;
+    event.enabled = true;
+    event.type = ReminderType::DateTime;
+    event.isOneTime = true;
+    event.startAt = QDateTime(QDate(2026, 4, 5), QTime(9, 0));
+
+    ReminderProfile profile;
+    QVERIFY(!isSchedulableEvent(event, profile, QDateTime(QDate(2026, 4, 5), QTime(10, 0))));
+}
+
+void DomainTests::recurringPastEventIsDetectedAsMissed()
+{
+    ReminderEvent event;
+    event.enabled = true;
+    event.type = ReminderType::DateTime;
+    event.isOneTime = false;
+    event.recurrenceRule = QStringLiteral("daily");
+    event.startAt = QDateTime(QDate(2026, 4, 5), QTime(9, 0));
+    event.nextTriggerAt = event.startAt;
+
+    ReminderProfile profile;
+    QVERIFY(isMissedRecurringEvent(event, profile, QDateTime(QDate(2026, 4, 5), QTime(10, 0))));
+}
+
+void DomainTests::dailyRecurrenceUsesEventTimeZone()
+{
+    const QTimeZone helsinki("Europe/Helsinki");
+    const QTimeZone utc("UTC");
+
+    ReminderEvent event;
+    event.enabled = true;
+    event.startAt = QDateTime(QDate(2026, 4, 5), QTime(9, 0), helsinki);
+    event.timezoneMode = QStringLiteral("event");
+    event.recurrenceRule = QStringLiteral("daily");
+    event.isOneTime = false;
+
+    const auto next = computeNextDateTimeOccurrence(event, QDateTime(QDate(2026, 4, 5), QTime(8, 0), utc));
+    QCOMPARE(next.timeZone(), helsinki);
+    QCOMPARE(next.date(), QDate(2026, 4, 6));
+    QCOMPARE(next.time(), QTime(9, 0));
 }
 
 void DomainTests::quietHoursAcrossMidnight()

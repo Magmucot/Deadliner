@@ -21,6 +21,23 @@ QString nowText()
     return QDateTime::currentDateTime().toString(Qt::ISODate);
 }
 
+bool columnExists(QSqlDatabase db, const QString &tableName, const QString &columnName)
+{
+    QSqlQuery query(db);
+    query.prepare(QStringLiteral("PRAGMA table_info(%1)").arg(tableName));
+    if (!query.exec()) {
+        return false;
+    }
+
+    while (query.next()) {
+        if (query.value(1).toString() == columnName) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 ReminderProfile profileFromQuery(const QSqlQuery &query)
 {
     ReminderProfile profile;
@@ -54,6 +71,7 @@ ReminderEvent eventFromQuery(const QSqlQuery &query)
     event.timezoneMode = query.value(QStringLiteral("timezone_mode")).toString();
     event.recurrenceRule = query.value(QStringLiteral("recurrence_rule")).toString();
     event.isOneTime = query.value(QStringLiteral("is_one_time")).toBool();
+    event.skipMissedOccurrences = query.value(QStringLiteral("skip_missed_occurrences")).toBool();
     event.enabled = query.value(QStringLiteral("enabled")).toBool();
     event.lastTriggeredAt = query.value(QStringLiteral("last_triggered_at")).toDateTime();
     event.nextTriggerAt = query.value(QStringLiteral("next_trigger_at")).toDateTime();
@@ -157,6 +175,7 @@ bool Repository::runMigrations()
             "timezone_mode TEXT NOT NULL,"
             "recurrence_rule TEXT NOT NULL,"
             "is_one_time INTEGER NOT NULL,"
+            "skip_missed_occurrences INTEGER NOT NULL DEFAULT 1,"
             "enabled INTEGER NOT NULL,"
             "last_triggered_at TEXT,"
             "next_trigger_at TEXT,"
@@ -209,6 +228,14 @@ bool Repository::runMigrations()
         }
     }
 
+    if (!columnExists(m_db, QStringLiteral("reminder_events"), QStringLiteral("skip_missed_occurrences"))) {
+        QSqlQuery query(m_db);
+        if (!query.exec(QStringLiteral("ALTER TABLE reminder_events ADD COLUMN skip_missed_occurrences INTEGER NOT NULL DEFAULT 1"))) {
+            qWarning() << "Migration failed" << query.lastError().text();
+            return false;
+        }
+    }
+
     if (!cleanupDuplicates()) {
         return false;
     }
@@ -221,55 +248,6 @@ bool Repository::cleanupDuplicates()
     if (!m_db.transaction()) {
         qWarning() << "Failed to start duplicate cleanup transaction" << m_db.lastError().text();
         return false;
-    }
-
-    QSqlQuery duplicateProfilesQuery(m_db);
-    duplicateProfilesQuery.prepare(QStringLiteral(
-        "SELECT id, name FROM reminder_profiles "
-        "WHERE id NOT IN (SELECT MIN(id) FROM reminder_profiles GROUP BY name) "
-        "ORDER BY id ASC"));
-    if (!duplicateProfilesQuery.exec()) {
-        qWarning() << "Failed to load duplicate profiles" << duplicateProfilesQuery.lastError().text();
-        m_db.rollback();
-        return false;
-    }
-
-    while (duplicateProfilesQuery.next()) {
-        const qint64 duplicateId = duplicateProfilesQuery.value(0).toLongLong();
-        const QString name = duplicateProfilesQuery.value(1).toString();
-
-        QSqlQuery canonicalProfileQuery(m_db);
-        canonicalProfileQuery.prepare(QStringLiteral("SELECT MIN(id) FROM reminder_profiles WHERE name=?"));
-        canonicalProfileQuery.addBindValue(name);
-        if (!canonicalProfileQuery.exec() || !canonicalProfileQuery.next()) {
-            qWarning() << "Failed to resolve canonical profile" << canonicalProfileQuery.lastError().text();
-            m_db.rollback();
-            return false;
-        }
-
-        const qint64 canonicalId = canonicalProfileQuery.value(0).toLongLong();
-        if (canonicalId == 0 || canonicalId == duplicateId) {
-            continue;
-        }
-
-        QSqlQuery moveEventsQuery(m_db);
-        moveEventsQuery.prepare(QStringLiteral("UPDATE reminder_events SET profile_id=? WHERE profile_id=?"));
-        moveEventsQuery.addBindValue(canonicalId);
-        moveEventsQuery.addBindValue(duplicateId);
-        if (!moveEventsQuery.exec()) {
-            qWarning() << "Failed to remap duplicate profile events" << moveEventsQuery.lastError().text();
-            m_db.rollback();
-            return false;
-        }
-
-        QSqlQuery deleteProfileQuery(m_db);
-        deleteProfileQuery.prepare(QStringLiteral("DELETE FROM reminder_profiles WHERE id=?"));
-        deleteProfileQuery.addBindValue(duplicateId);
-        if (!deleteProfileQuery.exec()) {
-            qWarning() << "Failed to delete duplicate profile" << deleteProfileQuery.lastError().text();
-            m_db.rollback();
-            return false;
-        }
     }
 
     QSqlQuery duplicateEventsQuery(m_db);
@@ -497,6 +475,7 @@ void Repository::bindEvent(QSqlQuery &query, const ReminderEvent &event) const
     query.addBindValue(event.timezoneMode);
     query.addBindValue(event.recurrenceRule);
     query.addBindValue(event.isOneTime);
+    query.addBindValue(event.skipMissedOccurrences);
     query.addBindValue(event.enabled);
     query.addBindValue(event.lastTriggeredAt);
     query.addBindValue(event.nextTriggerAt);
@@ -598,8 +577,8 @@ qint64 Repository::saveEvent(const ReminderEvent &event)
         return 0;
     }
     return insertOrUpdate(
-        QStringLiteral("INSERT INTO reminder_events (title, description, type, profile_id, start_at, timezone_mode, recurrence_rule, is_one_time, enabled, last_triggered_at, next_trigger_at, pending_snooze_count, pending_original_trigger_at, pending_mode, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"),
-        QStringLiteral("UPDATE reminder_events SET title=?, description=?, type=?, profile_id=?, start_at=?, timezone_mode=?, recurrence_rule=?, is_one_time=?, enabled=?, last_triggered_at=?, next_trigger_at=?, pending_snooze_count=?, pending_original_trigger_at=?, pending_mode=?, created_at=?, updated_at=? WHERE id=?"),
+        QStringLiteral("INSERT INTO reminder_events (title, description, type, profile_id, start_at, timezone_mode, recurrence_rule, is_one_time, skip_missed_occurrences, enabled, last_triggered_at, next_trigger_at, pending_snooze_count, pending_original_trigger_at, pending_mode, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"),
+        QStringLiteral("UPDATE reminder_events SET title=?, description=?, type=?, profile_id=?, start_at=?, timezone_mode=?, recurrence_rule=?, is_one_time=?, skip_missed_occurrences=?, enabled=?, last_triggered_at=?, next_trigger_at=?, pending_snooze_count=?, pending_original_trigger_at=?, pending_mode=?, created_at=?, updated_at=? WHERE id=?"),
         event.id,
         [this, &event](QSqlQuery &query) { bindEvent(query, event); });
 }

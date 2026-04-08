@@ -49,6 +49,8 @@ private:
     domain::ReminderProfile profileForId(qint64 id) const;
     domain::ReminderEvent eventForId(qint64 id) const;
     domain::QuietHoursPolicy quietPolicyForId(qint64 id) const;
+    bool saveEventOrWarn(const domain::ReminderEvent &event, const QString &message);
+    bool saveProfileOrWarn(const domain::ReminderProfile &profile, const QString &message);
     void persistOutcome(const domain::ReminderOccurrence &occurrence,
                         domain::SeverityMode shownMode,
                         domain::ReminderResult result,

@@ -91,6 +91,7 @@ struct ReminderEvent {
     QString timezoneMode = QStringLiteral("local");
     QString recurrenceRule = QStringLiteral("none");
     bool isOneTime = true;
+    bool skipMissedOccurrences = true;
     bool enabled = true;
     QDateTime lastTriggeredAt;
     QDateTime nextTriggerAt;

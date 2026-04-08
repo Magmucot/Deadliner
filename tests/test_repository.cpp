@@ -14,9 +14,12 @@ class RepositoryTests : public QObject {
 private slots:
     void opensAndSeeds();
     void savesAndLoadsEvent();
+    void savesEventSkipMissedOccurrencesFlag();
+    void saveDuplicateEventReturnsFailure();
     void deletesEventLogsWithEvent();
-    void deletesBuiltInProfileWithEvents();
-    void removesDuplicateProfilesAndEventsOnOpen();
+    void builtInProfileCanBeDeleted();
+    void duplicateProfilesAreNotRemovedByNameOnly();
+    void duplicateEventsAreRemovedOnOpen();
 };
 
 void RepositoryTests::opensAndSeeds()
@@ -64,7 +67,65 @@ void RepositoryTests::savesAndLoadsEvent()
     QVERIFY(found);
 }
 
-void RepositoryTests::deletesBuiltInProfileWithEvents()
+void RepositoryTests::saveDuplicateEventReturnsFailure()
+{
+    QTemporaryDir dir;
+    infrastructure::Repository repository;
+    QString error;
+    QVERIFY(repository.open(dir.filePath(QStringLiteral("deadliner.sqlite")), &error));
+
+    const auto state = repository.loadState();
+    QVERIFY(!state.profiles.isEmpty());
+
+    domain::ReminderEvent event;
+    event.title = QStringLiteral("Duplicate check");
+    event.type = domain::ReminderType::DateTime;
+    event.profileId = state.profiles.constFirst().id;
+    event.startAt = QDateTime::currentDateTime().addDays(1);
+    event.recurrenceRule = QStringLiteral("none");
+    event.isOneTime = true;
+    event.enabled = true;
+    event.nextTriggerAt = event.startAt;
+
+    QVERIFY(repository.saveEvent(event) > 0);
+    QCOMPARE(repository.saveEvent(event), qint64{0});
+}
+
+void RepositoryTests::savesEventSkipMissedOccurrencesFlag()
+{
+    QTemporaryDir dir;
+    infrastructure::Repository repository;
+    QString error;
+    QVERIFY(repository.open(dir.filePath(QStringLiteral("deadliner.sqlite")), &error));
+
+    const auto state = repository.loadState();
+    QVERIFY(!state.profiles.isEmpty());
+
+    domain::ReminderEvent event;
+    event.title = QStringLiteral("Recurring catch-up setting");
+    event.type = domain::ReminderType::DateTime;
+    event.profileId = state.profiles.constFirst().id;
+    event.startAt = QDateTime::currentDateTime().addDays(-1);
+    event.recurrenceRule = QStringLiteral("daily");
+    event.isOneTime = false;
+    event.skipMissedOccurrences = false;
+    event.enabled = true;
+    event.nextTriggerAt = event.startAt;
+
+    const qint64 id = repository.saveEvent(event);
+    QVERIFY(id > 0);
+
+    bool found = false;
+    for (const auto &item : repository.loadState().events) {
+        if (item.id == id) {
+            found = true;
+            QVERIFY(!item.skipMissedOccurrences);
+        }
+    }
+    QVERIFY(found);
+}
+
+void RepositoryTests::builtInProfileCanBeDeleted()
 {
     QTemporaryDir dir;
     infrastructure::Repository repository;
@@ -73,7 +134,14 @@ void RepositoryTests::deletesBuiltInProfileWithEvents()
 
     const auto initialState = repository.loadState();
     QVERIFY(!initialState.profiles.isEmpty());
-    const qint64 profileId = initialState.profiles.constFirst().id;
+    qint64 profileId = 0;
+    for (const auto &profile : initialState.profiles) {
+        if (profile.builtIn) {
+            profileId = profile.id;
+            break;
+        }
+    }
+    QVERIFY(profileId > 0);
 
     domain::ReminderEvent event;
     event.title = QStringLiteral("Delete with profile");
@@ -89,12 +157,21 @@ void RepositoryTests::deletesBuiltInProfileWithEvents()
     QVERIFY(repository.deleteProfile(profileId));
 
     const auto stateAfterDelete = repository.loadState();
+    bool foundProfile = false;
     for (const auto &profile : stateAfterDelete.profiles) {
-        QVERIFY(profile.id != profileId);
+        if (profile.id == profileId) {
+            foundProfile = true;
+        }
     }
+    QVERIFY(!foundProfile);
+
+    bool foundEvent = false;
     for (const auto &item : stateAfterDelete.events) {
-        QVERIFY(item.profileId != profileId);
+        if (item.title == event.title && item.profileId == profileId) {
+            foundEvent = true;
+        }
     }
+    QVERIFY(!foundEvent);
 }
 
 void RepositoryTests::deletesEventLogsWithEvent()
@@ -128,34 +205,46 @@ void RepositoryTests::deletesEventLogsWithEvent()
     entry.result = domain::ReminderResult::Completed;
     QVERIFY(repository.logOccurrence(entry));
 
-    QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("delete_event_logs_check"));
-    db.setDatabaseName(databasePath);
-    QVERIFY(db.open());
+    {
+        QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("delete_event_logs_check"));
+        db.setDatabaseName(databasePath);
+        QVERIFY(db.open());
 
-    QSqlQuery countBefore(db);
-    countBefore.prepare(QStringLiteral("SELECT COUNT(*) FROM occurrence_log WHERE event_id=?"));
-    countBefore.addBindValue(eventId);
-    QVERIFY(countBefore.exec());
-    QVERIFY(countBefore.next());
-    QCOMPARE(countBefore.value(0).toInt(), 1);
+        QSqlQuery countBefore(db);
+        countBefore.prepare(QStringLiteral("SELECT COUNT(*) FROM occurrence_log WHERE event_id=?"));
+        countBefore.addBindValue(eventId);
+        QVERIFY(countBefore.exec());
+        QVERIFY(countBefore.next());
+        QCOMPARE(countBefore.value(0).toInt(), 1);
+
+        db.close();
+    }
+    QSqlDatabase::removeDatabase(QStringLiteral("delete_event_logs_check"));
 
     QVERIFY(repository.deleteEvent(eventId));
 
-    QSqlQuery countAfter(db);
-    countAfter.prepare(QStringLiteral("SELECT COUNT(*) FROM occurrence_log WHERE event_id=?"));
-    countAfter.addBindValue(eventId);
-    QVERIFY(countAfter.exec());
-    QVERIFY(countAfter.next());
-    QCOMPARE(countAfter.value(0).toInt(), 0);
+    {
+        QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("delete_event_logs_check_after"));
+        db.setDatabaseName(databasePath);
+        QVERIFY(db.open());
 
-    db.close();
-    QSqlDatabase::removeDatabase(QStringLiteral("delete_event_logs_check"));
+        QSqlQuery countAfter(db);
+        countAfter.prepare(QStringLiteral("SELECT COUNT(*) FROM occurrence_log WHERE event_id=?"));
+        countAfter.addBindValue(eventId);
+        QVERIFY(countAfter.exec());
+        QVERIFY(countAfter.next());
+        QCOMPARE(countAfter.value(0).toInt(), 0);
+
+        db.close();
+    }
+    QSqlDatabase::removeDatabase(QStringLiteral("delete_event_logs_check_after"));
 }
 
-void RepositoryTests::removesDuplicateProfilesAndEventsOnOpen()
+void RepositoryTests::duplicateProfilesAreNotRemovedByNameOnly()
 {
     QTemporaryDir dir;
     const QString databasePath = dir.filePath(QStringLiteral("deadliner.sqlite"));
+    QString duplicateName;
 
     {
         infrastructure::Repository repository;
@@ -165,6 +254,7 @@ void RepositoryTests::removesDuplicateProfilesAndEventsOnOpen()
         const auto state = repository.loadState();
         QVERIFY(!state.profiles.isEmpty());
         const auto templateProfile = state.profiles.constFirst();
+        duplicateName = templateProfile.name;
 
         {
             QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("duplicates_setup"));
@@ -180,6 +270,52 @@ void RepositoryTests::removesDuplicateProfilesAndEventsOnOpen()
             QVERIFY(profileInsert.exec());
             const qint64 duplicateProfileId = profileInsert.lastInsertId().toLongLong();
             QVERIFY(duplicateProfileId > 0);
+
+            QSqlQuery updateProfile(db);
+            updateProfile.prepare(QStringLiteral("UPDATE reminder_profiles SET interval_minutes=? WHERE id=?"));
+            updateProfile.addBindValue(templateProfile.intervalMinutes + 5);
+            updateProfile.addBindValue(duplicateProfileId);
+            QVERIFY(updateProfile.exec());
+
+            db.close();
+        }
+        QSqlDatabase::removeDatabase(QStringLiteral("duplicates_setup"));
+    }
+
+    {
+        infrastructure::Repository repository;
+        QString error;
+        QVERIFY(repository.open(databasePath, &error));
+        const auto state = repository.loadState();
+
+        int profileCount = 0;
+        for (const auto &profile : state.profiles) {
+            if (profile.name == duplicateName) {
+                ++profileCount;
+            }
+        }
+        QCOMPARE(profileCount, 2);
+    }
+}
+
+void RepositoryTests::duplicateEventsAreRemovedOnOpen()
+{
+    QTemporaryDir dir;
+    const QString databasePath = dir.filePath(QStringLiteral("deadliner.sqlite"));
+
+    {
+        infrastructure::Repository repository;
+        QString error;
+        QVERIFY(repository.open(databasePath, &error));
+
+        const auto state = repository.loadState();
+        QVERIFY(!state.profiles.isEmpty());
+        const auto templateProfile = state.profiles.constFirst();
+
+        {
+            QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("duplicate_events_setup"));
+            db.setDatabaseName(databasePath);
+            QVERIFY(db.open());
 
             QSqlQuery eventInsert(db);
             QVERIFY(eventInsert.prepare(QStringLiteral(
@@ -214,7 +350,7 @@ void RepositoryTests::removesDuplicateProfilesAndEventsOnOpen()
 
             db.close();
         }
-        QSqlDatabase::removeDatabase(QStringLiteral("duplicates_setup"));
+        QSqlDatabase::removeDatabase(QStringLiteral("duplicate_events_setup"));
     }
 
     {
@@ -224,20 +360,12 @@ void RepositoryTests::removesDuplicateProfilesAndEventsOnOpen()
         const auto state = repository.loadState();
 
         int profileCount = 0;
-        for (const auto &profile : state.profiles) {
-            if (profile.name == QStringLiteral("Gentle Breaks")) {
+        for (const auto &event : state.events) {
+            if (event.title == QStringLiteral("Duplicate event")) {
                 ++profileCount;
             }
         }
         QCOMPARE(profileCount, 1);
-
-        int eventCount = 0;
-        for (const auto &event : state.events) {
-            if (event.title == QStringLiteral("Duplicate event")) {
-                ++eventCount;
-            }
-        }
-        QCOMPARE(eventCount, 1);
     }
 }
 

@@ -7,6 +7,7 @@ namespace deadliner::ui {
 enum class MainSection {
     Today,
     Events,
+    Overdue,
     Profiles,
     Statistics,
     Settings,

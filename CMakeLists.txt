@@ -55,6 +55,8 @@ add_library(deadliner_core
     src/ui/profile_dialog.cpp
     src/ui/main_window.h
     src/ui/main_window.cpp
+    src/ui/overdue/overdue_page.h
+    src/ui/overdue/overdue_page.cpp
     src/ui/onboarding/onboarding_dialog.h
     src/ui/onboarding/onboarding_dialog.cpp
     src/ui/profiles/profiles_page.h
@@ -124,7 +126,17 @@ if(BUILD_TESTING)
         tests/test_repository.cpp
     )
 
+    add_executable(deadliner_scheduler_tests
+        tests/test_scheduler.cpp
+    )
+
     target_link_libraries(deadliner_repository_tests
+        PRIVATE
+            deadliner_core
+            Qt6::Test
+    )
+
+    target_link_libraries(deadliner_scheduler_tests
         PRIVATE
             deadliner_core
             Qt6::Test
@@ -132,4 +144,5 @@ if(BUILD_TESTING)
 
     add_test(NAME deadliner_domain_tests COMMAND deadliner_domain_tests)
     add_test(NAME deadliner_repository_tests COMMAND deadliner_repository_tests)
+    add_test(NAME deadliner_scheduler_tests COMMAND deadliner_scheduler_tests)
 endif()

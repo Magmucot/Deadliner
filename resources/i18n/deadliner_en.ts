@@ -35,6 +35,10 @@
             <translation>Downgrade</translation>
         </message>
         <message>
+            <source>Due at</source>
+            <translation>Due at</translation>
+        </message>
+        <message>
             <source>Due now</source>
             <translation>Due now</translation>
         </message>
@@ -139,12 +143,8 @@
             <translation>Take a break away from the screen</translation>
         </message>
         <message>
-            <source>Mode: %1
-Snooze: %2 x %3 min
-Break: %4 min</source>
-            <translation>Mode: %1
-Snooze: %2 x %3 min
-Break: %4 min</translation>
+            <source>%1 mode, snooze %2 x %3 min, break %4 min</source>
+            <translation>%1 mode, snooze %2 x %3 min, break %4 min</translation>
         </message>
         <message>
             <source>Cancel</source>
