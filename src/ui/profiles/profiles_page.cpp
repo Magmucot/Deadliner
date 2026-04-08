@@ -30,7 +30,12 @@ namespace deadliner::ui
         m_form->setRowWrapPolicy(QFormLayout::WrapLongRows);
         m_form->setHorizontalSpacing(12);
         m_form->setVerticalSpacing(10);
+    }
 
+    ProfilesPage::ProfilesPage(QWidget *parent)
+        : QWidget(parent)
+    {
+        auto *layout = new QVBoxLayout(this);
         layout->setContentsMargins(24, 24, 24, 24);
         layout->setSpacing(16);
 
