@@ -2,15 +2,18 @@
 
 #include <QAction>
 #include <QApplication>
-#include <QDBusConnection>
-#include <QDBusConnectionInterface>
-#include <QDBusMessage>
-#include <QDBusReply>
 #include <QIcon>
 #include <QMenu>
 #include <QStyle>
 #include <QSystemTrayIcon>
+
+#ifdef Q_OS_LINUX
+#include <QDBusConnection>
+#include <QDBusConnectionInterface>
+#include <QDBusMessage>
+#include <QDBusReply>
 #include <QVariantMap>
+#endif
 
 namespace deadliner::ui {
 
@@ -88,6 +91,7 @@ void TrayController::showMessage(const QString &title, const QString &message)
 
 bool TrayController::desktopNotificationsAvailable() const
 {
+#ifdef Q_OS_LINUX
     auto *interface = QDBusConnection::sessionBus().interface();
     if (interface == nullptr) {
         return false;
@@ -95,10 +99,14 @@ bool TrayController::desktopNotificationsAvailable() const
 
     const QDBusReply<bool> reply = interface->isServiceRegistered(QStringLiteral("org.freedesktop.Notifications"));
     return reply.isValid() && reply.value();
+#else
+    return false;
+#endif
 }
 
 bool TrayController::showDesktopMessage(const QString &title, const QString &message) const
 {
+#ifdef Q_OS_LINUX
     if (!desktopNotificationsAvailable()) {
         return false;
     }
@@ -121,6 +129,11 @@ bool TrayController::showDesktopMessage(const QString &title, const QString &mes
 
     const QDBusMessage reply = QDBusConnection::sessionBus().call(dbusMessage);
     return reply.type() != QDBusMessage::ErrorMessage;
+#else
+    Q_UNUSED(title);
+    Q_UNUSED(message);
+    return false;
+#endif
 }
 
 void TrayController::retranslateUi()
