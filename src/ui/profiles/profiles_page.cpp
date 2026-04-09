@@ -17,6 +17,21 @@
 namespace deadliner::ui
 {
 
+    ProfileDialog::ProfileDialog(const QList<domain::QuietHoursPolicy> &policies,
+                                 const domain::ReminderProfile *profile,
+                                 QWidget *parent)
+        : QDialog(parent)
+    {
+        resize(520, 420);
+
+        auto *layout = new QVBoxLayout(this);
+        m_form = new QFormLayout();
+        m_form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+        m_form->setRowWrapPolicy(QFormLayout::WrapLongRows);
+        m_form->setHorizontalSpacing(12);
+        m_form->setVerticalSpacing(10);
+    }
+
     ProfilesPage::ProfilesPage(QWidget *parent)
         : QWidget(parent)
     {
