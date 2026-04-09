@@ -6,6 +6,7 @@
 #include <QGridLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QLocale>
 #include <QAbstractItemView>
 #include <QStackedWidget>
 #include <QTableWidget>
@@ -94,10 +95,11 @@ namespace deadliner::ui
 
         m_stack->setCurrentWidget(stats.isEmpty() ? static_cast<QWidget *>(m_emptyState) : static_cast<QWidget *>(m_table));
         m_table->setRowCount(stats.size());
+        const QLocale locale;
         for (int row = 0; row < stats.size(); ++row)
         {
             const auto &day = stats.at(row);
-            m_table->setItem(row, 0, new QTableWidgetItem(day.date.toString(Qt::ISODate)));
+            m_table->setItem(row, 0, new QTableWidgetItem(locale.toString(day.date, QLocale::ShortFormat)));
             m_table->setItem(row, 1, new QTableWidgetItem(QString::number(day.completedCount)));
             m_table->setItem(row, 2, new QTableWidgetItem(QString::number(day.skippedCount)));
             m_table->setItem(row, 3, new QTableWidgetItem(QString::number(day.snoozedCount)));

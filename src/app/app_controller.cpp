@@ -13,9 +13,11 @@
 #include <QDialog>
 #include <QDir>
 #include <QFileInfo>
+#include <QLocale>
 #include <QMessageBox>
 #include <QStandardPaths>
 #include <QSystemTrayIcon>
+#include <QTimer>
 
 namespace deadliner::app
 {
@@ -96,10 +98,23 @@ namespace deadliner::app
         m_autostartManager.setEnabled(m_settings.launchOnStartup, QCoreApplication::applicationFilePath());
         refreshState();
 
+        m_trayController.setIcon(m_settings.trayIcon);
         if (m_trayController.isAvailable())
         {
-            m_trayController.setIcon(m_settings.trayIcon);
             m_trayController.show();
+        }
+        else
+        {
+            // On Windows 10 the system tray may not yet be ready before the
+            // event loop starts.  Retry once from the event loop so the icon
+            // still appears when the shell finishes initialising.
+            QTimer::singleShot(0, this, [this]()
+                               {
+                if (m_trayController.isAvailable())
+                {
+                    m_trayController.show();
+                    refreshState();
+                } });
         }
 
         if (!runOnboardingIfNeeded())
@@ -598,7 +613,7 @@ namespace deadliner::app
             }
         }
 
-        m_trayController.showMessage(tr("Deadliner"), tr("Reminders paused until %1").arg(target.toString(Qt::ISODate)));
+        m_trayController.showMessage(tr("Deadliner"), tr("Reminders paused until %1").arg(QLocale().toString(target, QLocale::ShortFormat)));
         refreshState();
     }
 

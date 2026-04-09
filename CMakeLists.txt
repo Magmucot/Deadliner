@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(Deadliner VERSION 0.0.0.1.2a LANGUAGES CXX)
+project(Deadliner LANGUAGES CXX)
+set(PROJECT_VERSION "0.0.0.1.2a")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,7 +14,10 @@ set(CMAKE_AUTORCC ON)
 include(GNUInstallDirs)
 include(CTest)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Sql DBus Test LinguistTools)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Sql Test LinguistTools)
+if(UNIX AND NOT APPLE)
+    find_package(Qt6 6.5 REQUIRED COMPONENTS DBus)
+endif()
 
 set(DEADLINER_TS_FILES
     resources/i18n/deadliner_en.ts
@@ -83,11 +87,14 @@ target_include_directories(deadliner_core PUBLIC src)
 target_link_libraries(deadliner_core
     PUBLIC
         Qt6::Core
-        Qt6::DBus
         Qt6::Gui
         Qt6::Widgets
         Qt6::Sql
 )
+
+if(UNIX AND NOT APPLE)
+    target_link_libraries(deadliner_core PUBLIC Qt6::DBus)
+endif()
 
 qt_add_translations(deadliner_core
     TS_FILES ${DEADLINER_TS_FILES}

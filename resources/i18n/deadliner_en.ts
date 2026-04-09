@@ -678,5 +678,29 @@
             <source>%1 min late</source>
             <translation>%1 min late</translation>
         </message>
+        <message>
+            <source>Select an item first.</source>
+            <translation>Select an item first.</translation>
+        </message>
+        <message>
+            <source>20-20-20 eye rest</source>
+            <translation>20-20-20 eye rest</translation>
+        </message>
+        <message>
+            <source>Short eye-rest reminder suggested during onboarding.</source>
+            <translation>Short eye-rest reminder suggested during onboarding.</translation>
+        </message>
+        <message>
+            <source>No quiet hours</source>
+            <translation>No quiet hours</translation>
+        </message>
+        <message>
+            <source>Mode: %1
+Snooze: %2 x %3 min
+Break: %4 min</source>
+            <translation>Mode: %1
+Snooze: %2 x %3 min
+Break: %4 min</translation>
+        </message>
     </context>
 </TS>
