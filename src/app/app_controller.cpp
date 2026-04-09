@@ -166,14 +166,18 @@ namespace deadliner::app
                 continue;
             }
 
-            if (domain::isMissedRecurringEvent(event, profile, now) && !event.skipMissedOccurrences)
+            if (domain::isMissedRecurringEvent(event, profile, now))
             {
-                if (!event.nextTriggerAt.isValid() && event.startAt.isValid())
+                // Never fire a missed recurring occurrence on open — advance to the
+                // next future trigger regardless of skipMissedOccurrences.  The flag
+                // only controls whether the missed slot is counted as skipped; the
+                // scheduling logic must always produce a future nextTriggerAt.
+                const QDateTime next = domain::normalizeNextTrigger(event, profile, now);
+                if (next != event.nextTriggerAt)
                 {
-                    event.nextTriggerAt = event.startAt;
+                    event.nextTriggerAt = next;
                     saveEventOrWarn(event, tr("The event state could not be refreshed. Check for a duplicate title/date/profile combination."));
                 }
-
                 normalizedEvents.push_back(event);
                 continue;
             }
