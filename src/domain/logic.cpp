@@ -369,7 +369,15 @@ namespace deadliner::domain
             return reference.addSecs(profile.intervalMinutes * 60);
         }
 
-        return event.lastTriggeredAt.addSecs(profile.intervalMinutes * 60);
+        QDateTime candidate = event.lastTriggeredAt.addSecs(profile.intervalMinutes * 60);
+        // If the app was closed longer than one interval the candidate is already in
+        // the past.  Reschedule from `reference` so the event does not fire
+        // immediately on the next scheduler tick.
+        if (candidate <= reference)
+        {
+            candidate = reference.addSecs(profile.intervalMinutes * 60);
+        }
+        return candidate;
     }
 
     QDateTime normalizeNextTrigger(const ReminderEvent &event, const ReminderProfile &profile, const QDateTime &reference)
