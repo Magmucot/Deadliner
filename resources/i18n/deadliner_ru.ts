@@ -678,5 +678,29 @@
             <source>%1 min late</source>
             <translation>%1 мин назад</translation>
         </message>
+        <message>
+            <source>Select an item first.</source>
+            <translation>Сначала выберите элемент.</translation>
+        </message>
+        <message>
+            <source>20-20-20 eye rest</source>
+            <translation>Отдых глаз 20-20-20</translation>
+        </message>
+        <message>
+            <source>Short eye-rest reminder suggested during onboarding.</source>
+            <translation>Короткое напоминание для отдыха глаз, предложенное при первичной настройке.</translation>
+        </message>
+        <message>
+            <source>No quiet hours</source>
+            <translation>Без тихих часов</translation>
+        </message>
+        <message>
+            <source>Mode: %1
+Snooze: %2 x %3 min
+Break: %4 min</source>
+            <translation>Режим: %1
+Откладывание: %2 x %3 мин
+Перерыв: %4 мин</translation>
+        </message>
     </context>
 </TS>

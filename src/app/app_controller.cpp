@@ -13,9 +13,11 @@
 #include <QDialog>
 #include <QDir>
 #include <QFileInfo>
+#include <QLocale>
 #include <QMessageBox>
 #include <QStandardPaths>
 #include <QSystemTrayIcon>
+#include <QTimer>
 
 namespace deadliner::app
 {
@@ -96,10 +98,23 @@ namespace deadliner::app
         m_autostartManager.setEnabled(m_settings.launchOnStartup, QCoreApplication::applicationFilePath());
         refreshState();
 
+        m_trayController.setIcon(m_settings.trayIcon);
         if (m_trayController.isAvailable())
         {
-            m_trayController.setIcon(m_settings.trayIcon);
             m_trayController.show();
+        }
+        else
+        {
+            // On Windows 10 the system tray may not yet be ready before the
+            // event loop starts.  Retry once from the event loop so the icon
+            // still appears when the shell finishes initialising.
+            QTimer::singleShot(0, this, [this]()
+                               {
+                if (m_trayController.isAvailable())
+                {
+                    m_trayController.show();
+                    refreshState();
+                } });
         }
 
         if (!runOnboardingIfNeeded())
@@ -151,14 +166,18 @@ namespace deadliner::app
                 continue;
             }
 
-            if (domain::isMissedRecurringEvent(event, profile, now) && !event.skipMissedOccurrences)
+            if (domain::isMissedRecurringEvent(event, profile, now))
             {
-                if (!event.nextTriggerAt.isValid() && event.startAt.isValid())
+                // Never fire a missed recurring occurrence on open — advance to the
+                // next future trigger regardless of skipMissedOccurrences.  The flag
+                // only controls whether the missed slot is counted as skipped; the
+                // scheduling logic must always produce a future nextTriggerAt.
+                const QDateTime next = domain::normalizeNextTrigger(event, profile, now);
+                if (next != event.nextTriggerAt)
                 {
-                    event.nextTriggerAt = event.startAt;
+                    event.nextTriggerAt = next;
                     saveEventOrWarn(event, tr("The event state could not be refreshed. Check for a duplicate title/date/profile combination."));
                 }
-
                 normalizedEvents.push_back(event);
                 continue;
             }
@@ -598,7 +617,7 @@ namespace deadliner::app
             }
         }
 
-        m_trayController.showMessage(tr("Deadliner"), tr("Reminders paused until %1").arg(target.toString(Qt::ISODate)));
+        m_trayController.showMessage(tr("Deadliner"), tr("Reminders paused until %1").arg(QLocale().toString(target, QLocale::ShortFormat)));
         refreshState();
     }
 
