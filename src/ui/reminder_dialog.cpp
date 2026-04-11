@@ -75,9 +75,7 @@ namespace deadliner::ui
 
         if (isPersistentOverlay())
         {
-            setWindowFlag(Qt::WindowStaysOnTopHint, true);
-            setWindowFlag(Qt::FramelessWindowHint, true);
-            setWindowState(Qt::WindowFullScreen);
+            setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
             setStyleSheet(QString::fromUtf8(kOverlayQss));
             rootLayout->setContentsMargins(0, 0, 0, 0);
 

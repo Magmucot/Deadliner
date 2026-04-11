@@ -68,10 +68,11 @@ namespace deadliner::ui
         : QDialog(parent), m_remainingSeconds(qMax(1, breakDurationMinutes) * 60), m_timer(new QTimer(this)), m_allowSkip(allowSkip)
     {
         setWindowTitle(tr("Break time"));
-        setWindowFlag(Qt::WindowStaysOnTopHint, true);
-        setWindowState(Qt::WindowFullScreen);
+        // Set all flags in one call — multiple setWindowFlag() calls recreate the native
+        // handle each time. Qt::WindowFullScreen via setWindowState() is unreliable on
+        // Windows (does not reliably cover the taskbar); explicit geometry is used instead.
+        setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
         setModal(true);
-        setWindowFlag(Qt::FramelessWindowHint, true);
         setStyleSheet(QString::fromUtf8(kWindowQss));
 
         auto *layout = new QVBoxLayout(this);
