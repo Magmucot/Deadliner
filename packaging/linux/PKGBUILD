@@ -9,13 +9,13 @@ depends=('qt6-base' 'sqlite')
 makedepends=('cmake' 'ninja' 'qt6-tools')
 # No remote source — builds directly from the repository tree.
 # $startdir is set by makepkg to the directory containing this PKGBUILD,
-# i.e. packaging/linux/. Going two levels up reaches the repo root.
+# i.e. packaging/linux/. Going three levels up reaches the repo root.
 source=()
 sha256sums=()
 
 build() {
     local reporoot
-    reporoot="$(realpath "${startdir}/../..")"
+    reporoot="$(realpath "${startdir}/../../..")"
 
     cmake \
         -S "$reporoot" \
@@ -33,13 +33,13 @@ package() {
         "${startdir}/deadliner.desktop" \
         "${pkgdir}/usr/share/applications/deadliner.desktop"
 
-    if [ -f "${startdir}/deadliner.png" ]; then
+    if [ -f "${startdir}/deadliner.ico" ]; then
         install -Dm644 \
-            "${startdir}/deadliner.png" \
-            "${pkgdir}/usr/share/icons/hicolor/256x256/apps/deadliner.png"
+            "${startdir}/deadliner.ico" \
+            "${pkgdir}/usr/share/icons/hicolor/256x256/apps/deadliner.ico"
     fi
 
     install -Dm644 \
-        "$(realpath "${startdir}/../../LICENSE")" \
+        "$(realpath "${startdir}/../../../LICENSE")" \
         "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

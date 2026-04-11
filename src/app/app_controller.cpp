@@ -114,6 +114,11 @@ namespace deadliner::app
                 {
                     m_trayController.show();
                     refreshState();
+                }
+                else if (m_settings.startMinimized)
+                {
+                    // Tray unavailable and window suppressed — show it as last resort.
+                    m_mainWindow.show();
                 } });
         }
 

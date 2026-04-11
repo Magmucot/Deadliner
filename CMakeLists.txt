@@ -100,7 +100,7 @@ qt_add_translations(deadliner_core
     TS_FILES ${DEADLINER_TS_FILES}
 )
 
-qt_add_executable(deadliner
+qt_add_executable(deadliner WIN32
     src/main.cpp
 )
 
