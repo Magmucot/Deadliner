@@ -93,6 +93,11 @@ Function ShortcutPageLeave
 FunctionEnd
 
 Section "install"
+    ; Ensure any running instance is closed before overwriting files
+    ExecWait 'taskkill /F /IM deadliner.exe /T'
+    Sleep 1000
+
+    SetOverwrite on
     SetOutPath $INSTDIR
 
     File "deadliner.exe"
