@@ -259,6 +259,12 @@ namespace deadliner::app
         domain::ReminderAction action = domain::ReminderAction::Dismissed;
         const domain::SeverityMode effectiveMode = quietDecision.effectiveMode;
 
+#ifdef Q_OS_WIN
+        QWidget *dialogParent = nullptr;
+#else
+        QWidget *dialogParent = &m_mainWindow;
+#endif
+
         if (effectiveMode == domain::SeverityMode::Soft)
         {
             if (m_trayController.supportsMessages())
@@ -269,7 +275,7 @@ namespace deadliner::app
             }
             else
             {
-                ui::ReminderDialog dialog(occurrence, nullptr);
+                ui::ReminderDialog dialog(occurrence, dialogParent);
                 dialog.show();
                 dialog.raise();
                 dialog.activateWindow();
@@ -298,7 +304,7 @@ namespace deadliner::app
             ui::BreakWindow window(profile.breakDurationMinutes,
                                    domain::canSnooze(profile, occurrence.snoozeCount),
                                    profile.allowSkip,
-                                   nullptr);
+                                   dialogParent);
             window.show();
             window.raise();
             window.activateWindow();
@@ -322,7 +328,7 @@ namespace deadliner::app
         }
         else
         {
-            ui::ReminderDialog dialog(occurrence, nullptr);
+            ui::ReminderDialog dialog(occurrence, dialogParent);
             dialog.show();
             dialog.raise();
             dialog.activateWindow();
