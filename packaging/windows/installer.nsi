@@ -1,4 +1,5 @@
 ; Deadliner NSIS Installer Script
+Unicode true
 !define APPNAME "Deadliner"
 !define COMPANYNAME "Deadliner"
 !define DESCRIPTION "Desktop break and reminder utility"

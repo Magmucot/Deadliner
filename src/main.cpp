@@ -8,6 +8,8 @@
 
 int main(int argc, char *argv[])
 {
+    Q_INIT_RESOURCE(icons);
+
     QApplication app(argc, argv);
     QApplication::setApplicationName(QStringLiteral("Deadliner"));
     QApplication::setOrganizationName(QStringLiteral("Deadliner"));

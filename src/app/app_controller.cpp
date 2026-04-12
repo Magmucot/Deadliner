@@ -99,28 +99,22 @@ namespace deadliner::app
         refreshState();
 
         m_trayController.setIcon(m_settings.trayIcon);
-        if (m_trayController.isAvailable())
+
+        // Always defer tray initialisation to the event loop on all platforms.
+        QTimer::singleShot(0, this, [this]()
         {
             m_trayController.show();
-        }
-        else
-        {
-            // On Windows 10 the system tray may not yet be ready before the
-            // event loop starts.  Retry once from the event loop so the icon
-            // still appears when the shell finishes initialising.
-            QTimer::singleShot(0, this, [this]()
-                               {
-                if (m_trayController.isAvailable())
-                {
-                    m_trayController.show();
-                    refreshState();
-                }
-                else if (m_settings.startMinimized)
-                {
-                    // Tray unavailable and window suppressed — show it as last resort.
-                    m_mainWindow.show();
-                } });
-        }
+            
+            if (m_trayController.isAvailable())
+            {
+                refreshState();
+            }
+            else if (m_settings.startMinimized)
+            {
+                // Tray unavailable and window suppressed — show it as last resort.
+                m_mainWindow.show();
+            }
+        });
 
         if (!runOnboardingIfNeeded())
         {
