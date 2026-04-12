@@ -139,6 +139,7 @@ namespace deadliner::ui
         {
             m_updateTimer->start();
         }
+        refreshDynamicContent();
     }
 
     void TodayPage::hideEvent(QHideEvent *event)
