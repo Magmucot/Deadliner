@@ -43,11 +43,11 @@ LangString CreateDesktopShortcut ${LANG_ENGLISH} "Create desktop shortcut"
 LangString CreateStartMenuShortcut ${LANG_ENGLISH} "Create Start Menu shortcut"
 LangString ShortcutsTitle        ${LANG_ENGLISH} "Shortcuts"
 LangString ShortcutsSubtitle     ${LANG_ENGLISH} "Create shortcuts for ${APPNAME}"
-LangString RunApp                ${LANG_RUSSIAN}  "Запустить ${APPNAME} после установки"
-LangString CreateDesktopShortcut ${LANG_RUSSIAN}  "Создать ярлык на рабочем столе"
-LangString CreateStartMenuShortcut ${LANG_RUSSIAN}  "Создать ярлык в меню Пуск"
-LangString ShortcutsTitle        ${LANG_RUSSIAN}  "Ярлыки"
-LangString ShortcutsSubtitle     ${LANG_RUSSIAN}  "Создание ярлыков для ${APPNAME}"
+LangString RunApp                ${LANG_RUSSIAN}  "Run ${APPNAME} after installation"
+LangString CreateDesktopShortcut ${LANG_RUSSIAN}  "Create desktop shortcut"
+LangString CreateStartMenuShortcut ${LANG_RUSSIAN}  "Create Start Menu shortcut"
+LangString ShortcutsTitle        ${LANG_RUSSIAN}  "Shortcuts"
+LangString ShortcutsSubtitle     ${LANG_RUSSIAN}  "Create shortcuts for ${APPNAME}"
 
 !macro VerifyUserIsAdmin
     UserInfo::GetAccountType
