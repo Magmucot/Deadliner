@@ -269,7 +269,10 @@ namespace deadliner::app
             }
             else
             {
-                ui::ReminderDialog dialog(occurrence, &m_mainWindow);
+                ui::ReminderDialog dialog(occurrence, nullptr);
+                dialog.show();
+                dialog.raise();
+                dialog.activateWindow();
                 dialog.exec();
                 action = dialog.action();
 
@@ -295,7 +298,10 @@ namespace deadliner::app
             ui::BreakWindow window(profile.breakDurationMinutes,
                                    domain::canSnooze(profile, occurrence.snoozeCount),
                                    profile.allowSkip,
-                                   &m_mainWindow);
+                                   nullptr);
+            window.show();
+            window.raise();
+            window.activateWindow();
             const int code = window.exec();
             const auto result = window.result();
             if (code == QDialog::Accepted && result.completed)
@@ -316,7 +322,10 @@ namespace deadliner::app
         }
         else
         {
-            ui::ReminderDialog dialog(occurrence, &m_mainWindow);
+            ui::ReminderDialog dialog(occurrence, nullptr);
+            dialog.show();
+            dialog.raise();
+            dialog.activateWindow();
             dialog.exec();
             action = dialog.action();
             switch (action)
