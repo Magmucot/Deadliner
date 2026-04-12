@@ -20,34 +20,33 @@ OutFile "deadliner-installer.exe"
 
 !include LogicLib.nsh
 !include MUI2.nsh
+!include nsDialogs.nsh
 
-Var StartMenuCB
+Var StartMenuCheckbox
+Var DesktopCheckbox
 
 !define MUI_FINISHPAGE_RUN "$INSTDIR\deadliner.exe"
 !define MUI_FINISHPAGE_RUN_TEXT "$(RunApp)"
 !define MUI_FINISHPAGE_RUN_NOTCHECKED
 
-!define MUI_FINISHPAGE_SHOWREADME ""
-!define MUI_FINISHPAGE_SHOWREADME_TEXT "$(CreateDesktopShortcut)"
-!define MUI_FINISHPAGE_SHOWREADME_FUNCTION CreateDesktopShortcut
-!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
-
-!define MUI_FINISHPAGE_CUSTOMFUNCTION_SHOW FinishShow
-!define MUI_FINISHPAGE_CUSTOMFUNCTION_LEAVE FinishLeave
-
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
+Page custom ShortcutPage ShortcutPageLeave
 !insertmacro MUI_PAGE_FINISH
+
+!insertmacro MUI_LANGUAGE English
+!insertmacro MUI_LANGUAGE Russian
 
 LangString RunApp                ${LANG_ENGLISH} "Run ${APPNAME} after installation"
 LangString CreateDesktopShortcut ${LANG_ENGLISH} "Create desktop shortcut"
 LangString CreateStartMenuShortcut ${LANG_ENGLISH} "Create Start Menu shortcut"
+LangString ShortcutsTitle        ${LANG_ENGLISH} "Shortcuts"
+LangString ShortcutsSubtitle     ${LANG_ENGLISH} "Create shortcuts for ${APPNAME}"
 LangString RunApp                ${LANG_RUSSIAN}  "Запустить ${APPNAME} после установки"
 LangString CreateDesktopShortcut ${LANG_RUSSIAN}  "Создать ярлык на рабочем столе"
 LangString CreateStartMenuShortcut ${LANG_RUSSIAN}  "Создать ярлык в меню Пуск"
-
-!insertmacro MUI_LANGUAGE English
-!insertmacro MUI_LANGUAGE Russian
+LangString ShortcutsTitle        ${LANG_RUSSIAN}  "Ярлыки"
+LangString ShortcutsSubtitle     ${LANG_RUSSIAN}  "Создание ярлыков для ${APPNAME}"
 
 !macro VerifyUserIsAdmin
     UserInfo::GetAccountType
@@ -64,30 +63,31 @@ Function .onInit
     !insertmacro VerifyUserIsAdmin
 FunctionEnd
 
-Function CreateDesktopShortcut
-    CreateShortcut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\deadliner.exe"
+Function ShortcutPage
+    !insertmacro MUI_HEADER_TEXT "$(ShortcutsTitle)" "$(ShortcutsSubtitle)"
+    nsDialogs::Create 1018
+    Pop $0
+
+    ${NSD_CreateCheckbox} 0 0 100% 12u "$(CreateStartMenuShortcut)"
+    Pop $StartMenuCheckbox
+    ${NSD_SetState} $StartMenuCheckbox ${BST_CHECKED}
+
+    ${NSD_CreateCheckbox} 0 20u 100% 12u "$(CreateDesktopShortcut)"
+    Pop $DesktopCheckbox
+
+    nsDialogs::Show
 FunctionEnd
 
-Function FinishShow
-    GetDlgItem $1 $MUI_HWND 1200
-    ${If} $1 <> 0
-        System::Call 'user32::GetWindowRect(i $1, @ .r2, @ .r3, @ .r4, @ .r5)'
-        System::Call 'user32::ScreenToClient(i $MUI_HWND, @ .r2, @ .r3)'
-        IntOp $3 $3 + 20
-        IntOp $5 $5 - $2
-        System::Call 'user32::CreateWindowEx(i0, t"BUTTON", t"$(CreateStartMenuShortcut)", \
-            i0x50010003, i$r2, i$r3, i$r5, i16, i$MUI_HWND, i0, i0, i0) i.StartMenuCB'
-        SendMessage $1 ${WM_GETFONT} 0 0 $6
-        SendMessage $StartMenuCB ${WM_SETFONT} $6 0
-        SendMessage $StartMenuCB ${BM_SETCHECK} ${BST_CHECKED} 0
-    ${EndIf}
-FunctionEnd
-
-Function FinishLeave
-    SendMessage $StartMenuCB ${BM_GETCHECK} 0 0 $0
+Function ShortcutPageLeave
+    ${NSD_GetState} $StartMenuCheckbox $0
     ${If} $0 = ${BST_CHECKED}
         CreateDirectory "$SMPROGRAMS\${APPNAME}"
         CreateShortcut "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk" "$INSTDIR\deadliner.exe"
+    ${EndIf}
+
+    ${NSD_GetState} $DesktopCheckbox $0
+    ${If} $0 = ${BST_CHECKED}
+        CreateShortcut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\deadliner.exe"
     ${EndIf}
 FunctionEnd
 

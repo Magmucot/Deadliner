@@ -167,11 +167,11 @@ namespace deadliner::ui
         QString iconPath;
         if (iconVariant == QStringLiteral("variant2"))
         {
-            iconPath = QStringLiteral(":/icons/icons/icon_variant2.ico");
+            iconPath = QStringLiteral(":/icons/icons/icon_variant2.png");
         }
         else
         {
-            iconPath = QStringLiteral(":/icons/icons/icon_variant1.ico");
+            iconPath = QStringLiteral(":/icons/icons/icon_variant1.png");
         }
 
         QIcon icon(iconPath);
