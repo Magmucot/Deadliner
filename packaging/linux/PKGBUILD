@@ -15,7 +15,7 @@ sha256sums=()
 
 build() {
     local reporoot
-    reporoot="$(realpath "${startdir}/../../..")"
+    reporoot="$(realpath "${startdir}/../..")"
 
     cmake \
         -S "$reporoot" \
@@ -40,6 +40,6 @@ package() {
     fi
 
     install -Dm644 \
-        "$(realpath "${startdir}/../../../LICENSE")" \
+        "$(realpath "${startdir}/../../LICENSE")" \
         "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
