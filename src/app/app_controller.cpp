@@ -22,6 +22,7 @@
 
 #ifdef Q_OS_WIN
 #include <windows.h>
+#include <shellapi.h>
 #include <ShObjIdl.h>
 #endif
 
