@@ -87,14 +87,43 @@ namespace deadliner::application
     void ReminderScheduler::armNext()
     {
         m_timer.stop();
+        m_armedFor = {};
         const auto occurrences = buildOccurrences(QDateTime::currentDateTime());
         if (occurrences.isEmpty())
         {
             return;
         }
 
-        const qint64 ms = qMax<qint64>(0, QDateTime::currentDateTime().msecsTo(occurrences.constFirst().dueAt));
+        m_armedFor = occurrences.constFirst().dueAt;
+        const qint64 ms = qMax<qint64>(0, QDateTime::currentDateTime().msecsTo(m_armedFor));
         m_timer.start(static_cast<int>(qMin<qint64>(ms, std::numeric_limits<int>::max())));
+    }
+
+    bool ReminderScheduler::needsResync(const QDateTime &now) const
+    {
+        if (!m_armedFor.isValid())
+        {
+            return false;
+        }
+
+        if (now >= m_armedFor.addSecs(2))
+        {
+            return true;
+        }
+
+        if (!m_timer.isActive())
+        {
+            return false;
+        }
+
+        const qint64 remainingMs = m_timer.remainingTimeAsDuration().count();
+        if (remainingMs < 0)
+        {
+            return false;
+        }
+
+        const QDateTime expected = now.addMSecs(remainingMs);
+        return qAbs(expected.msecsTo(m_armedFor)) > 2000;
     }
 
     void ReminderScheduler::onTimeout()

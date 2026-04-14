@@ -2,6 +2,7 @@
 
 #include "domain/models.h"
 
+#include <QDateTime>
 #include <QHash>
 #include <QObject>
 #include <QTimer>
@@ -20,6 +21,7 @@ public:
 
 public slots:
     void rebuild();
+    bool needsResync(const QDateTime &now) const;
 
 signals:
     void occurrenceDue(const domain::ReminderOccurrence &occurrence);
@@ -34,6 +36,7 @@ private:
     QList<domain::ReminderEvent> m_events;
     QHash<qint64, domain::ReminderProfile> m_profiles;
     QTimer m_timer;
+    QDateTime m_armedFor;
 };
 
 class StatisticsService {

@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QScreen>
 #include <QVBoxLayout>
+#include <QWindow>
 #include <QWidget>
 
 namespace deadliner::ui
@@ -75,7 +76,8 @@ namespace deadliner::ui
 
         if (isPersistentOverlay())
         {
-            setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+            setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
+            setWindowModality(Qt::WindowModal);
             setStyleSheet(QString::fromUtf8(kOverlayQss));
             rootLayout->setContentsMargins(0, 0, 0, 0);
 
@@ -186,7 +188,16 @@ namespace deadliner::ui
 
         if (isPersistentOverlay())
         {
-            if (QScreen *screen = QGuiApplication::primaryScreen())
+            QWidget *anchor = parentWidget() != nullptr ? parentWidget()->window() : nullptr;
+            if (anchor != nullptr)
+            {
+                setGeometry(anchor->geometry());
+                if (windowHandle() != nullptr && anchor->windowHandle() != nullptr)
+                {
+                    windowHandle()->setTransientParent(anchor->windowHandle());
+                }
+            }
+            else if (QScreen *screen = QGuiApplication::primaryScreen())
             {
                 setGeometry(screen->geometry());
             }

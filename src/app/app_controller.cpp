@@ -10,6 +10,7 @@
 
 #include <QApplication>
 #include <QDate>
+#include <QDateTime>
 #include <QDialog>
 #include <QDir>
 #include <QFileInfo>
@@ -18,6 +19,10 @@
 #include <QStandardPaths>
 #include <QSystemTrayIcon>
 #include <QTimer>
+
+#ifdef Q_OS_WIN
+#include <shellapi.h>
+#endif
 
 namespace deadliner::app
 {
@@ -79,10 +84,15 @@ namespace deadliner::app
         connect(&m_mainWindow, &ui::MainWindow::closeRequested, this, &AppController::quitApplication);
         connect(&m_languageManager, &ui::LanguageManager::languageApplied, this, [this]()
                 { m_trayController.retranslateUi(); });
+        installRuntimeResyncHooks();
     }
 
     bool AppController::initialize()
     {
+#ifdef Q_OS_WIN
+        SetCurrentProcessExplicitAppUserModelID(L"Deadliner.Deadliner");
+#endif
+
         QString error;
         if (!m_repository.open(dataPath(QStringLiteral("deadliner.sqlite")), &error))
         {
@@ -102,7 +112,7 @@ namespace deadliner::app
 
         // Always defer tray initialisation to the event loop on all platforms.
         QTimer::singleShot(0, this, [this]()
-        {
+                           {
             m_trayController.show();
             
             if (m_trayController.isAvailable())
@@ -113,8 +123,7 @@ namespace deadliner::app
             {
                 // Tray unavailable and window suppressed — show it as last resort.
                 m_mainWindow.show();
-            }
-        });
+            } });
 
         if (!runOnboardingIfNeeded())
         {
@@ -181,11 +190,14 @@ namespace deadliner::app
                 continue;
             }
 
-            const QDateTime next = domain::normalizeNextTrigger(event, profile, now);
-            if (next != event.nextTriggerAt)
+            if (!event.nextTriggerAt.isValid())
             {
-                event.nextTriggerAt = next;
-                saveEventOrWarn(event, tr("The event state could not be refreshed. Check for a duplicate title/date/profile combination."));
+                const QDateTime next = domain::normalizeNextTrigger(event, profile, now);
+                if (next != event.nextTriggerAt)
+                {
+                    event.nextTriggerAt = next;
+                    saveEventOrWarn(event, tr("The event state could not be refreshed. Check for a duplicate title/date/profile combination."));
+                }
             }
 
             normalizedEvents.push_back(event);
@@ -206,6 +218,15 @@ namespace deadliner::app
 
     void AppController::handleOccurrence(const domain::ReminderOccurrence &occurrence)
     {
+        if (m_handlingOccurrence)
+        {
+            return;
+        }
+
+        m_handlingOccurrence = true;
+        const auto resetHandlingOccurrence = qScopeGuard([this]()
+                                                         { m_handlingOccurrence = false; });
+
         const bool manualOccurrence = occurrence.eventId <= 0;
         auto event = eventForId(occurrence.eventId);
         const auto profile = profileForId(occurrence.profileId);
@@ -684,6 +705,36 @@ namespace deadliner::app
         m_trayController.retranslateUi();
     }
 
+    void AppController::installRuntimeResyncHooks()
+    {
+        connect(qApp, &QGuiApplication::applicationStateChanged, this, [this](Qt::ApplicationState state)
+                {
+            if (m_handlingOccurrence)
+            {
+                return;
+            }
+
+            if (state == Qt::ApplicationActive)
+            {
+                refreshState();
+            } });
+
+        m_runtimeResyncTimer = new QTimer(this);
+        m_runtimeResyncTimer->setInterval(30000);
+        connect(m_runtimeResyncTimer, &QTimer::timeout, this, [this]()
+                {
+            if (m_handlingOccurrence)
+            {
+                return;
+            }
+
+            if (m_scheduler.needsResync(QDateTime::currentDateTime()))
+            {
+                refreshState();
+            } });
+        m_runtimeResyncTimer->start();
+    }
+
     bool AppController::runOnboardingIfNeeded()
     {
         if (m_settings.onboardingCompleted)
@@ -723,7 +774,7 @@ namespace deadliner::app
 
         for (const auto &event : m_state.events)
         {
-            if (event.title == tr("20-20-20 eye rest"))
+            if (event.title == tr("Eye rest"))
             {
                 return;
             }
@@ -732,8 +783,8 @@ namespace deadliner::app
         const auto baseProfile = m_state.profiles.constFirst();
         domain::ReminderProfile presetProfile = baseProfile;
         presetProfile.id = 0;
-        presetProfile.name = tr("20-20-20 eye rest");
-        presetProfile.intervalMinutes = 20;
+        presetProfile.name = tr("Eye rest");
+        presetProfile.intervalMinutes = 30;
         presetProfile.breakDurationMinutes = 1;
         presetProfile.severityMode = domain::SeverityMode::Soft;
         presetProfile.maxSnoozeCount = 1;
@@ -745,7 +796,7 @@ namespace deadliner::app
         }
 
         domain::ReminderEvent presetEvent;
-        presetEvent.title = tr("20-20-20 eye rest");
+        presetEvent.title = tr("Eye rest");
         presetEvent.description = tr("Short eye-rest reminder suggested during onboarding.");
         presetEvent.type = domain::ReminderType::BreakInterval;
         presetEvent.profileId = profileId;

@@ -13,6 +13,8 @@
 #include <QHash>
 #include <QObject>
 
+class QTimer;
+
 namespace deadliner::app {
 
 class AppController : public QObject {
@@ -43,6 +45,7 @@ private slots:
 
 private:
     void applyAppearanceSettings();
+    void installRuntimeResyncHooks();
     bool runOnboardingIfNeeded();
     void ensureRecommendedOnboardingPreset(bool enabled);
     void ensureStartupTestEvents();
@@ -66,6 +69,8 @@ private:
     ui::TrayController m_trayController;
     domain::AppSettings m_settings;
     infrastructure::RepositoryState m_state;
+    QTimer *m_runtimeResyncTimer = nullptr;
+    bool m_handlingOccurrence = false;
 };
 
 }  // namespace deadliner::app

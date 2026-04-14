@@ -78,6 +78,7 @@ namespace deadliner::ui
 
     void StatisticsPage::setState(const QList<domain::StatsDaily> &stats)
     {
+        retranslateUi();
         m_stats = stats;
         int completed = 0;
         int skipped = 0;

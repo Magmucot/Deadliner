@@ -140,6 +140,10 @@ if(BUILD_TESTING)
         tests/test_scheduler.cpp
     )
 
+    add_executable(deadliner_app_controller_tests
+        tests/test_app_controller.cpp
+    )
+
     target_link_libraries(deadliner_repository_tests
         PRIVATE
             deadliner_core
@@ -152,7 +156,14 @@ if(BUILD_TESTING)
             Qt6::Test
     )
 
+    target_link_libraries(deadliner_app_controller_tests
+        PRIVATE
+            deadliner_core
+            Qt6::Test
+    )
+
     add_test(NAME deadliner_domain_tests COMMAND deadliner_domain_tests)
     add_test(NAME deadliner_repository_tests COMMAND deadliner_repository_tests)
     add_test(NAME deadliner_scheduler_tests COMMAND deadliner_scheduler_tests)
+    add_test(NAME deadliner_app_controller_tests COMMAND deadliner_app_controller_tests)
 endif()

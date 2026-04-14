@@ -9,6 +9,7 @@
 #include <QFormLayout>
 #include <QFrame>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QLabel>
 #include <QLayout>
 #include <QPushButton>
@@ -25,6 +26,15 @@ namespace deadliner::ui
 
     namespace
     {
+
+        QIcon previewIcon(const QString &variant)
+        {
+#ifdef Q_OS_WIN
+            return QIcon(QStringLiteral(":/icons/icons/%1.ico").arg(variant));
+#else
+            return QIcon(QStringLiteral(":/icons/icons/%1.png").arg(variant));
+#endif
+        }
 
         QComboBox *createBehaviorCombo(QWidget *parent)
         {
@@ -94,12 +104,12 @@ namespace deadliner::ui
         m_themeCombo = new QComboBox(content);
 
         m_iconVariant1Radio = new QRadioButton(content);
-        m_iconVariant1Radio->setIcon(QIcon(QStringLiteral(":/icons/icons/icon_variant1_256.png")));
+        m_iconVariant1Radio->setIcon(previewIcon(QStringLiteral("icon_variant1")));
         m_iconVariant1Radio->setIconSize(QSize(64, 64));
         m_iconVariant1Radio->setChecked(true);
 
         m_iconVariant2Radio = new QRadioButton(content);
-        m_iconVariant2Radio->setIcon(QIcon(QStringLiteral(":/icons/icons/icon_variant2_256.png")));
+        m_iconVariant2Radio->setIcon(previewIcon(QStringLiteral("icon_variant2")));
         m_iconVariant2Radio->setIconSize(QSize(64, 64));
 
         auto *iconWidget = new QWidget(content);

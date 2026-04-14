@@ -3,6 +3,7 @@
 #include "ui/common/navigation.h"
 
 #include <QObject>
+#include <QString>
 
 class QAction;
 class QMenu;
@@ -34,6 +35,7 @@ signals:
     void quitRequested();
 
 private:
+    QString iconResourcePath(const QString &iconVariant) const;
     bool desktopNotificationsAvailable() const;
     bool showDesktopMessage(const QString &title, const QString &message) const;
 

@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QIcon>
 #include <QMenu>
+#include <QOperatingSystemVersion>
 #include <QStyle>
 #include <QSystemTrayIcon>
 
@@ -164,17 +165,7 @@ namespace deadliner::ui
 
     void TrayController::setIcon(const QString &iconVariant)
     {
-        QString iconPath;
-        if (iconVariant == QStringLiteral("variant2"))
-        {
-            iconPath = QStringLiteral(":/icons/icons/icon_variant2.png");
-        }
-        else
-        {
-            iconPath = QStringLiteral(":/icons/icons/icon_variant1.png");
-        }
-
-        QIcon icon(iconPath);
+        QIcon icon(iconResourcePath(iconVariant));
         if (!icon.isNull())
         {
             m_tray->setIcon(icon);
@@ -183,6 +174,16 @@ namespace deadliner::ui
         {
             m_tray->setIcon(QApplication::style()->standardIcon(QStyle::SP_ComputerIcon));
         }
+    }
+
+    QString TrayController::iconResourcePath(const QString &iconVariant) const
+    {
+        const QString baseName = iconVariant == QStringLiteral("variant2")
+                                     ? QStringLiteral("icon_variant2")
+                                     : QStringLiteral("icon_variant1");
+        const bool preferIco = QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows;
+        return QStringLiteral(":/icons/icons/%1.%2")
+            .arg(baseName, preferIco ? QStringLiteral("ico") : QStringLiteral("png"));
     }
 
 } // namespace deadliner::ui

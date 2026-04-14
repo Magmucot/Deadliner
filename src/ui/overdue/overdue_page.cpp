@@ -98,6 +98,7 @@ namespace deadliner::ui
                                const QList<domain::ReminderProfile> &profiles,
                                const QDateTime &now)
     {
+        retranslateUi();
         m_events = events;
         m_profiles = profiles;
         m_now = now;

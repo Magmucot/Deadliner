@@ -10,6 +10,11 @@ namespace {
 
 QString translate(const QObject *context, const char *sourceText)
 {
+    if (const QString translated = QCoreApplication::translate("deadliner", sourceText);
+        !translated.isEmpty() && translated != QString::fromUtf8(sourceText)) {
+        return translated;
+    }
+
     const char *name = context ? context->metaObject()->className() : "UiText";
     return QCoreApplication::translate(name, sourceText);
 }

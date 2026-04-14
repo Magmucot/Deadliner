@@ -68,6 +68,7 @@ EventsPage::EventsPage(QWidget *parent)
 void EventsPage::setState(const QList<domain::ReminderEvent> &events,
                           const QList<domain::ReminderProfile> &profiles)
 {
+    retranslateUi();
     m_events = events;
     m_profiles = profiles;
 

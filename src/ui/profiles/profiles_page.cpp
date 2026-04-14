@@ -69,6 +69,7 @@ namespace deadliner::ui
 
     void ProfilesPage::setState(const QList<domain::ReminderProfile> &profiles)
     {
+        retranslateUi();
         m_profiles = profiles;
         m_stack->setCurrentWidget(profiles.isEmpty() ? static_cast<QWidget *>(m_emptyState) : static_cast<QWidget *>(m_table));
         m_table->setRowCount(profiles.size());

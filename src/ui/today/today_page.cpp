@@ -115,6 +115,7 @@ namespace deadliner::ui
                              const QList<domain::ReminderOccurrence> &upcoming,
                              const domain::AppSettings &settings)
     {
+        retranslateUi();
         m_events = events;
         m_profiles = profiles;
         m_upcoming = upcoming;
