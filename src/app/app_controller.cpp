@@ -21,6 +21,7 @@
 #include <QTimer>
 
 #ifdef Q_OS_WIN
+#include <windows.h>
 #include <shellapi.h>
 #endif
 
