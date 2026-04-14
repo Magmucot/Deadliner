@@ -24,10 +24,10 @@ public:
     explicit AppController(QObject *parent = nullptr);
 
     bool initialize();
-
-private slots:
     void refreshState();
     void handleOccurrence(const domain::ReminderOccurrence &occurrence);
+
+private slots:
     void showMainWindow();
     void showSection(ui::MainSection section);
     void addEvent();
