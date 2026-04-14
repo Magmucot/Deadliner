@@ -162,6 +162,18 @@ namespace deadliner::ui
         layout->addWidget(m_saveButton, 0, Qt::AlignLeft);
         layout->addStretch();
 
+        m_aboutTitleLabel = new QLabel(content);
+        m_aboutTitleLabel->setStyleSheet(QStringLiteral("font-size: 18px; font-weight: 600; margin-top: 24px;"));
+        m_aboutVersionLabel = new QLabel(content);
+        m_aboutAuthorLabel = new QLabel(content);
+        m_aboutGithubLabel = new QLabel(content);
+        m_aboutGithubLabel->setOpenExternalLinks(true);
+
+        layout->addWidget(m_aboutTitleLabel);
+        layout->addWidget(m_aboutVersionLabel);
+        layout->addWidget(m_aboutAuthorLabel);
+        layout->addWidget(m_aboutGithubLabel);
+
         repopulateCombos();
 
         connect(m_saveButton, &QPushButton::clicked, this, [this]()
@@ -278,6 +290,16 @@ namespace deadliner::ui
         m_platformNoteLabel->setText(m_hasTray
                                          ? tr("Tray integration is available on this desktop environment.")
                                          : tr("Tray integration is not available right now, so the main window stays as the primary control surface."));
+
+        m_aboutTitleLabel->setText(tr("About Deadliner"));
+        
+        QString appVersion = tr("Unknown");
+#ifdef APP_VERSION
+        appVersion = QStringLiteral(APP_VERSION);
+#endif
+        m_aboutVersionLabel->setText(tr("Version: %1").arg(appVersion));
+        m_aboutAuthorLabel->setText(tr("Author: Magus"));
+        m_aboutGithubLabel->setText(tr("GitHub: <a href=\"https://github.com/magus/deadliner\">https://github.com/magus/deadliner</a>"));
 
         if (m_languageCombo->count() >= 3)
         {

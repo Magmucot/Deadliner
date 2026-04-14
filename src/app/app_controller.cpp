@@ -107,6 +107,12 @@ namespace deadliner::app
         m_languageManager.applyLanguage(m_settings.language);
         applyAppearanceSettings();
 
+        if (m_settings.lastAppVersion != QStringLiteral(APP_VERSION)) {
+            m_repository.ensureSeedData(true);
+            m_settings.lastAppVersion = QStringLiteral(APP_VERSION);
+            m_settingsStore.save(m_settings);
+        }
+
         m_autostartManager.setEnabled(m_settings.launchOnStartup, QCoreApplication::applicationFilePath());
         refreshState();
 

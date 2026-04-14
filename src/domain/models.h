@@ -150,6 +150,7 @@ struct AppSettings {
     QDateTime pauseUntil;
     QString logLevel = QStringLiteral("info");
     QString trayIcon = QStringLiteral("variant1");
+    QString lastAppVersion;
 };
 
 struct QuietHoursDecision {

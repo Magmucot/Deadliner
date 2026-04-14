@@ -45,7 +45,7 @@ public:
     bool logOccurrence(const domain::OccurrenceLogEntry &entry);
     bool upsertDailyStats(const domain::StatsDaily &stats);
 
-    bool ensureSeedData();
+    bool ensureSeedData(bool forceUpdate = false);
 
 private:
     bool runMigrations();

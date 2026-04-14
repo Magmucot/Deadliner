@@ -313,14 +313,22 @@ namespace deadliner::infrastructure
         return true;
     }
 
-    bool Repository::ensureSeedData()
+    bool Repository::ensureSeedData(bool forceUpdate)
     {
         QSqlQuery countPolicies(m_db);
         countPolicies.exec(QStringLiteral("SELECT COUNT(*) FROM quiet_hours_policies"));
         countPolicies.next();
-        if (countPolicies.value(0).toInt() == 0)
+        if (countPolicies.value(0).toInt() == 0 || forceUpdate)
         {
             QuietHoursPolicy policy;
+            if (forceUpdate) {
+                QSqlQuery qPolicy(m_db);
+                qPolicy.prepare(QStringLiteral("SELECT id FROM quiet_hours_policies WHERE name=?"));
+                qPolicy.addBindValue(QStringLiteral("Night"));
+                if (qPolicy.exec() && qPolicy.next()) {
+                    policy.id = qPolicy.value(0).toLongLong();
+                }
+            }
             policy.name = QStringLiteral("Night");
             policy.startTime = QTime(22, 0);
             policy.endTime = QTime(8, 0);
@@ -333,11 +341,29 @@ namespace deadliner::infrastructure
         QSqlQuery countProfiles(m_db);
         countProfiles.exec(QStringLiteral("SELECT COUNT(*) FROM reminder_profiles"));
         countProfiles.next();
-        if (countProfiles.value(0).toInt() == 0)
+        if (countProfiles.value(0).toInt() == 0 || forceUpdate)
         {
             const qint64 quietId = loadQuietHoursPolicies().constFirst().id;
 
+            qint64 gentleId = 0;
+            qint64 focusId = 0;
+
+            if (forceUpdate) {
+                QSqlQuery qProfile(m_db);
+                qProfile.prepare(QStringLiteral("SELECT id, name FROM reminder_profiles WHERE built_in=1"));
+                if (qProfile.exec()) {
+                    while (qProfile.next()) {
+                        if (qProfile.value(1).toString() == QStringLiteral("Gentle reminder")) {
+                            gentleId = qProfile.value(0).toLongLong();
+                        } else if (qProfile.value(1).toString() == QStringLiteral("Focus Session")) {
+                            focusId = qProfile.value(0).toLongLong();
+                        }
+                    }
+                }
+            }
+
             ReminderProfile gentle;
+            gentle.id = gentleId;
             gentle.name = QStringLiteral("Gentle reminder");
             gentle.kind = ProfileKind::Break;
             gentle.intervalMinutes = 50;
@@ -349,9 +375,10 @@ namespace deadliner::infrastructure
             gentle.requirePostBreakConfirmation = true;
             gentle.allowSkip = true;
             gentle.builtIn = true;
-            const qint64 gentleId = saveProfile(gentle);
+            gentleId = saveProfile(gentle);
 
             ReminderProfile focus = gentle;
+            focus.id = focusId;
             focus.name = QStringLiteral("Focus Session");
             focus.intervalMinutes = 60;
             focus.breakDurationMinutes = 10;
@@ -361,17 +388,32 @@ namespace deadliner::infrastructure
             focus.builtIn = true;
             saveProfile(focus);
 
-            ReminderProfile custom = gentle;
-            custom.name = QStringLiteral("Break reminder");
-            custom.kind = ProfileKind::Break;
-            custom.severityMode = SeverityMode::Break;
-            custom.intervalMinutes = 45;
-            custom.breakDurationMinutes = 8;
-            custom.maxSnoozeCount = 2;
-            custom.builtIn = false;
-            const qint64 customId = saveProfile(custom);
+            qint64 customId = 0;
+            if (countProfiles.value(0).toInt() == 0) {
+                ReminderProfile custom = gentle;
+                custom.name = QStringLiteral("Break reminder");
+                custom.kind = ProfileKind::Break;
+                custom.severityMode = SeverityMode::Break;
+                custom.intervalMinutes = 45;
+                custom.breakDurationMinutes = 8;
+                custom.maxSnoozeCount = 2;
+                custom.builtIn = false;
+                customId = saveProfile(custom);
+            }
+
+            qint64 regularBreakEventId = 0;
+            if (forceUpdate) {
+                QSqlQuery qEvent(m_db);
+                qEvent.prepare(QStringLiteral("SELECT id FROM reminder_events WHERE title=? AND profile_id=?"));
+                qEvent.addBindValue(QStringLiteral("Regular break"));
+                qEvent.addBindValue(gentleId);
+                if (qEvent.exec() && qEvent.next()) {
+                    regularBreakEventId = qEvent.value(0).toLongLong();
+                }
+            }
 
             ReminderEvent event;
+            event.id = regularBreakEventId;
             event.title = QStringLiteral("Regular break");
             event.description = QStringLiteral("Take a short rest away from the screen.");
             event.type = ReminderType::BreakInterval;
@@ -382,20 +424,22 @@ namespace deadliner::infrastructure
             event.nextTriggerAt = event.startAt;
             saveEvent(event);
 
-            ReminderEvent hydration;
-            hydration.title = QStringLiteral("Drink water");
-            hydration.description = QStringLiteral("Stay hydrated during the day.");
-            hydration.type = ReminderType::DateTime;
-            hydration.profileId = customId;
-            hydration.startAt = QDateTime(QDate::currentDate(), QTime(11, 30));
-            if (hydration.startAt < QDateTime::currentDateTime())
-            {
-                hydration.startAt = hydration.startAt.addDays(1);
+            if (countProfiles.value(0).toInt() == 0) {
+                ReminderEvent hydration;
+                hydration.title = QStringLiteral("Drink water");
+                hydration.description = QStringLiteral("Stay hydrated during the day.");
+                hydration.type = ReminderType::DateTime;
+                hydration.profileId = customId;
+                hydration.startAt = QDateTime(QDate::currentDate(), QTime(11, 30));
+                if (hydration.startAt < QDateTime::currentDateTime())
+                {
+                    hydration.startAt = hydration.startAt.addDays(1);
+                }
+                hydration.recurrenceRule = QStringLiteral("weekdays");
+                hydration.isOneTime = false;
+                hydration.nextTriggerAt = hydration.startAt;
+                saveEvent(hydration);
             }
-            hydration.recurrenceRule = QStringLiteral("weekdays");
-            hydration.isOneTime = false;
-            hydration.nextTriggerAt = hydration.startAt;
-            saveEvent(hydration);
         }
 
         return true;

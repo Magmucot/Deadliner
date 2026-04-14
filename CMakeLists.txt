@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(Deadliner LANGUAGES CXX)
-set(PROJECT_VERSION "0.0.0.1.2a")
+set(PROJECT_VERSION "0.0.0.1.8.4a")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -83,6 +83,7 @@ add_library(deadliner_core
 )
 
 target_include_directories(deadliner_core PUBLIC src)
+target_compile_definitions(deadliner_core PUBLIC APP_VERSION="${PROJECT_VERSION}")
 
 target_link_libraries(deadliner_core
     PUBLIC

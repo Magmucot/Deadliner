@@ -67,6 +67,11 @@ namespace deadliner::ui
         QComboBox *m_persistentBehaviorCombo = nullptr;
         QComboBox *m_breakBehaviorCombo = nullptr;
         QPushButton *m_saveButton = nullptr;
+
+        QLabel *m_aboutTitleLabel = nullptr;
+        QLabel *m_aboutVersionLabel = nullptr;
+        QLabel *m_aboutAuthorLabel = nullptr;
+        QLabel *m_aboutGithubLabel = nullptr;
     };
 
 } // namespace deadliner::ui
