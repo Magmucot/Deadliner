@@ -21,7 +21,8 @@
 #include <QTimer>
 
 #ifdef Q_OS_WIN
-#include <shellapi.h>
+#include <windows.h>
+#include <ShObjIdl.h>
 #endif
 
 namespace deadliner::app
