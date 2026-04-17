@@ -94,7 +94,7 @@ FunctionEnd
 
 Section "install"
     ; Ensure any running instance is closed before overwriting files
-    ExecWait 'taskkill /F /IM deadliner.exe /T'
+    ExecWait '"$SYSDIR\taskkill.exe" /F /IM deadliner.exe /T'
     Sleep 1000
 
     SetOverwrite on
