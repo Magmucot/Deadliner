@@ -56,10 +56,4 @@
 # Tool caches
 /.ruff_cache/
 
-
-CLAUDE.md
-AGENTS.md
 .code-review-graph
-.claude
-CLAUDE.md
-AGENTS.md
