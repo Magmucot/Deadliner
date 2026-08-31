@@ -22,11 +22,6 @@ The Deadliner UI layer is built exclusively with **C++ Qt Widgets** and heavily 
 
 The UI components in this application are built procedurally via hand-written C++ code rather than Qt Designer `.ui` XML files. 
 
-**Why this deviation from the prompt's suggestion?**
-- Complete type-safety without `#include "ui_XYZ.h"` lifecycle mismatches.
-- Explicit control over layout margins, standard icons (`QStyle::SP_FileDialogContentsView`), and semantic CSS injection (`setStyleSheet`).
-- Allows seamless injection of dynamically generated `DictionaryTranslator` loops that would otherwise break standard `uic` translation pipelines.
-
 ## Localization (i18n)
 
 Given the variability of build environments (specifically the potential absence of `QtLinguistTools` on target machines), the UI ships with a **hybrid embedded localization engine**. 
@@ -54,9 +49,3 @@ Live translation switching is supported. When the user changes the language in S
 **Mandatory checklist for new UI modules**:
 - [ ] Ensure `changeEvent(QEvent *event)` routes `QEvent::LanguageChange` to a `retranslateUi()` helper.
 - [ ] If the screen contains data models (Tables, Combo boxes, dynamic Labels like "20 min left"), call the state-refresh logic *after* `retranslateUi()` to format the dynamic arguments again.
-
-## Design Deviations & Rationale
-
-- **No QML**: Strict adherence to the `Qt Widgets` requirement.
-- **Combined Rules/Profiles**: The UI spec described "Break Rules", but the core Domain explicitly maps interval policies into the `ReminderProfile` struct. The UI correctly binds Break and Generic logic into a unified Profile editor to reflect this architecture.
-- **Skip Locks vs Work Context**: The `BreakWindow` explicitly enforces the 10-second skip lock as requested, but it exposes an optional "Allow skip" toggle at the Profile level. Users with critical workloads can explicitly uncheck "Allow skip" or disable the skip-lock entirely per profile, offering a path around the toxicity of unconditional full-screen interruptions.
